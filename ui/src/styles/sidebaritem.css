@@ -1,0 +1,22 @@
+.sideBarItem {
+    display: flex;
+    padding: 10px 0;
+    border-radius: 0 100px 100px 0;
+}
+
+.sideBarItem:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.sideBarItem__arrow {
+    width: 28px;
+    margin-left: 12px;
+}
+
+.sideBarItem__main {
+    display: flex;
+}
+
+.sideBarItem__main>p {
+    margin-left: 12px;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "gdrivex-api",
+  "version": "1.0.0",
+  "description": "Merge multiple google drive and use as a single drive.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anabkhan/gdrivex.git"
+  },
+  "keywords": [
+    "google",
+    "drive",
+    "gdrive"
+  ],
+  "author": "Anab Khan",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/anabkhan/gdrivex/issues"
+  },
+  "homepage": "https://github.com/anabkhan/gdrivex#readme"
+}
