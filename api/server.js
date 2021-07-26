@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
+const { send } = require('process');
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
 
@@ -20,13 +21,33 @@ app.get('/', async (req, res) => {
     res.send('Hello World')
 });
 
+var oAuth2Client = null;
+
 app.get('/addDrive', async (req, res) => {
     // Load client secrets from a local file.
     fs.readFile('credentials.json', (err, content) => {
         if (err) return console.log('Error loading client secret file:', err);
         // Authorize a client with credentials, then call the Google Drive API.
-        authorize(JSON.parse(content), listFiles);
+        oAuth2Client = authorize(JSON.parse(content));
+
+        res.send(getURLForAccessToken(oAuth2Client))
     });
+});
+
+
+app.get('/submitAuthCode', async (req, res) => {
+    oAuth2Client.getToken(req.params.code, (err, token) => {
+        if (err) {
+            res.status(400).send('Failed ' + err)
+        };
+        oAuth2Client.setCredentials(token);
+        // Store the token to disk for later program executions
+        fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+          if (err) return console.error(err);
+          console.log('Token stored to', TOKEN_PATH);
+        });
+        res.send('Success')
+      });
 });
 
 /**
@@ -35,17 +56,29 @@ app.get('/addDrive', async (req, res) => {
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
+function authorize(credentials) {
     const {client_secret, client_id, redirect_uris} = credentials.installed;
     const oAuth2Client = new google.auth.OAuth2(
         client_id, client_secret, redirect_uris[0]);
+
+        return oAuth2Client;
+
+
   
     // Check if we have previously stored a token.
-    fs.readFile(TOKEN_PATH, (err, token) => {
-      if (err) return getAccessToken(oAuth2Client, callback);
-      oAuth2Client.setCredentials(JSON.parse(token));
-      callback(oAuth2Client);
-    });
+    // fs.readFile(TOKEN_PATH, (err, token) => {
+    //   if (err) return getAccessToken(oAuth2Client, callback);
+    //   oAuth2Client.setCredentials(JSON.parse(token));
+    //   callback(oAuth2Client);
+    // });
+  }
+
+  function getURLForAccessToken(oAuth2Client) {
+    const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES,
+      });
+      return authUrl;
   }
 
 function getAccessToken(oAuth2Client, callback) {
