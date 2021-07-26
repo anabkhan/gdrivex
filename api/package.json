@@ -20,5 +20,10 @@
   "bugs": {
     "url": "https://github.com/anabkhan/gdrivex/issues"
   },
-  "homepage": "https://github.com/anabkhan/gdrivex#readme"
+  "homepage": "https://github.com/anabkhan/gdrivex#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "googleapis": "^39.2.0"
+  }
 }
