@@ -5,6 +5,7 @@ import Header from './components/header'
 import SideBar from './components/sidebar/index'
 import GDriveLogo from "./media/google-drive-logo.svg";
 import { auth, db, provider } from "./firebase";
+import { DrivesView } from './components/DrivesView/DrivesView';
 
 function App() {
 
@@ -28,12 +29,15 @@ function App() {
     <div className="App">
 
       {
-        user ? (
+        !user ? (
         <>
             <Header />
             <div className='app__main'>
               <SideBar />
               <FilesView />
+            </div>
+            <div>
+            <DrivesView />
             </div>
           </>
         ) : (

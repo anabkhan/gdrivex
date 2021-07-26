@@ -1,0 +1,8 @@
+.drivesView{
+    margin-left: 15%;
+}
+
+.drivesView--header {
+    display: flex;
+    align-items: center;
+}

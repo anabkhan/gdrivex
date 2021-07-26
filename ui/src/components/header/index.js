@@ -8,7 +8,7 @@ const index = () => {
         <div className='header'>
             <div className='header__logo' >
                 <img src={GDriveLogo} alt="" />
-                <span>Drive</span>
+                <span>DriveX</span>
             </div>
             <div className='header__searchContainer'>
                 <div className="header__searchBar">

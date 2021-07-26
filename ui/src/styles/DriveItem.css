@@ -1,0 +1,16 @@
+.driveItem{
+    display: flex;
+    align-items: center;
+    height: 55px;
+    border-bottom: 1px solid rgb(291, 219, 219);
+    border-top: 1px solid rgb(291, 219, 219);
+    /* width: 100%; */
+}
+
+.driveItem--left{
+    flex: 1;
+}
+
+.driveItem--right>.MuiSvgIcon-root{
+    margin-right: 20px;
+}
