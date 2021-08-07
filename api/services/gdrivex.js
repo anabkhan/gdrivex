@@ -80,8 +80,32 @@ module.exports.GDriveXService = {
      * @param {*} onError 
      */
     getOrGenerateSchema: (file, onSchema, onError) => {
-        const fileNameKey =file.name.split('.').join('');
-        getData(dbPaths.fileSchema(fileNameKey), onSchema, (error) => {
+        const fileNameKey = file.name.split('.').join('-*-');
+        getData(dbPaths.fileSchema(fileNameKey), (schema) => {
+            getData(dbPaths.uploadTask(fileNameKey), (uploadTask) => {
+                schema = {...schema, uploadTask}
+                onSchema(schema)
+            }, (error) => {
+                // create an upload task for the file
+                let uploadTask = {
+                    done: false,
+                    failed: false,
+                    clustors: []
+                }
+                schema.clustors.forEach(eachClustor => {
+                    let clustor = {
+                        started: false,
+                        completed: false,
+                        lastChunk: null,
+                        ...eachClustor
+                    }
+                    uploadTask.clustors.push(clustor);
+                });
+                updateDB(dbPaths.uploadTasks(), fileNameKey, uploadTask)
+                schema = {...schema, uploadTask}
+                onSchema(schema)
+            })
+        }, (error) => {
             if (error.code === Messages.DATA_DOESNT_EXISTS) {
                 
                 // Schema doesn't exists , lets create one

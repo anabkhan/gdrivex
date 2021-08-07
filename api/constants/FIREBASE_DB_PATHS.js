@@ -5,15 +5,21 @@ module.exports.dbPaths = {
     drives,
     userDrive,
     fileSchema,
-    files
+    files,
+    uploadTask,
+    uploadTasks
 }
 
 function drives() {
-    return `${users()}/${UserService.getLoggedInUser().username}/drives`
+    return `${user()}/drives`;
 }
 
 function users() {
     return 'users'
+}
+
+function user() {
+    return `${users()}/${UserService.getLoggedInUser().username}`;
 }
 
 function userDrive(driveUser) {
@@ -21,9 +27,17 @@ function userDrive(driveUser) {
 }
 
 function files() {
-    return `${users()}/${UserService.getLoggedInUser().username}/files`
+    return `${user()}/files`
 }
 
 function fileSchema(fileName) {
     return files() + "/" + fileName;
+}
+
+function uploadTasks() {
+    return `${user()}/uploadTasks`
+}
+
+function uploadTask(fileNameKey) {
+    return uploadTasks() + "/" + fileNameKey;
 }

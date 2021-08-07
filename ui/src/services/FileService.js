@@ -20,3 +20,7 @@ function getSchema(file) {
         size: file.size
     })
 }
+
+function createUploadTask(schema) {
+    
+}

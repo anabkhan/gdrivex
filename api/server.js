@@ -84,6 +84,10 @@ app.post('/getSchema', async (req, res) => {
   }
 });
 
+app.post('/createUploadTask', async (req, res) => {
+  
+})
+
 
 app.post('/uploadFile', async (req, res) => {
   // var readStream = new Readable({
