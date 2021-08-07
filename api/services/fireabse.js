@@ -1,5 +1,6 @@
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebase = require('firebase')
+const firebase = require('firebase');
+const { Messages } = require('../constants/Messages');
 const firebaseConfig = {
     apiKey: "AIzaSyAv-an02bKJiAYmclEBnnYrksgvAZnyHrA",
     authDomain: "gdrivex-f98fc.firebaseapp.com",
@@ -24,7 +25,7 @@ module.exports.getData = (path, onData, onError) => {
         if (snapshot.exists()) {
             onData(snapshot.val());
         } else {
-            onError("Data doesnt exists")
+            onError({code: Messages.DATA_DOESNT_EXISTS, message: 'Data doesnt exists'})
         }
     }).catch((error) => {
         onData(error)

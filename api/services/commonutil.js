@@ -8,5 +8,20 @@ module.exports.CommonUtil = {
         } while (fileSizeInBytes > 1024);
         
         return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
+    },
+
+    createSuccessMessage: (data, message) => {
+        return {
+            status:'Success',
+            message,
+            data
+        }
+    },
+
+    createFailureMessage: (message) => {
+        return {
+            status:'Fail',
+            message
+        }
     }
 }

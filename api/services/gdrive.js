@@ -1,9 +1,11 @@
 const { dbPaths } = require("../constants/FIREBASE_DB_PATHS")
 const { getData } = require("./fireabse")
+const fs = require('fs');
+const {google} = require('googleapis');
 
-module.exports.gdriveService = {
-    uploadFile : (driveUser, fileStream, metadata) => {
-        getDriveObject(driveUser, (drive) => {
+module.exports.GDriveService = {
+    uploadFile : (driveUser, fileStream, metadata, onOutput, onError) => {
+        getDriveObject(driveUser, async (drive) => {
             try {
                 const response = await drive.files.create({
                       requestBody: metadata,
@@ -14,9 +16,11 @@ module.exports.gdriveService = {
                   });  
                   // report the response from the request
                   console.log(response.data);
+                  onOutput(response.data);
               } catch (error) {
                   //report the error message
                   console.log(error.message);
+                  onError(error.message);
               }
         })
     },

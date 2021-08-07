@@ -5,6 +5,9 @@ import './../../styles/NewFile.css'
 import firebase from 'firebase'
 import { storage, db } from "../../firebase";
 import { makeStyles, Modal } from '@material-ui/core';
+import { post } from '../../services/RestService';
+import { BASE_URL, UPLOAD_FILE } from '../../constants/REST_URLS';
+import { uploadFile } from '../../services/FileService';
 
 function getModalStyle() {
     return {
@@ -45,13 +48,28 @@ export const NewFile = () => {
     const handleChange = (e) => {
         if (e.target.files[0]) {
             setFile(e.target.files[0])
+            console.log('file', e.target.files[0])
         }
     }
 
     const handleUpload = () => {
         setUploading(true);
 
-        storage.ref(`files/${file.name}`).put(file).then(snapshot => {
+        uploadFile(file)
+
+        // const data = new FormData();
+        // data.append('file', file)
+
+        // return fetch(BASE_URL + UPLOAD_FILE, {
+        //     method: 'post',
+        //     body: data
+        // }).then((response) => response.json()).then(response => {
+        //     console.log(response)
+        // }).catch(error => {
+        //     console.log(error)
+        // })
+
+        /*storage.ref(`files/${file.name}`).put(file).then(snapshot => {
             console.log(snapshot)
 
             storage.ref('files').child(file.name).getDownloadURL().then(url => {
@@ -62,7 +80,7 @@ export const NewFile = () => {
                     size: snapshot._delegate.bytesTransferred
                 })
             })
-        })
+        })*/
     }
 
     return (
