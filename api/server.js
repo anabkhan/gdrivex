@@ -6,7 +6,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 const { send } = require('process');
 const { updateDB, getData } = require('./services/fireabse');
-const { getReadableFileSizeString } = require('./services/commonutil');
+const { CommonUtil } = require('./services/commonutil');
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
 
@@ -44,18 +44,19 @@ app.get('/submitAuthCode', async (req, res) => {
         };
         oAuth2Client.setCredentials(token);
         // Store the token to disk for later program executions
-        fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-          if (err) return console.error(err);
-          console.log('Token stored to', TOKEN_PATH);
-        });
+        // fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+        //   if (err) return console.error(err);
+        //   console.log('Token stored to', TOKEN_PATH);
+        // });
 
         const drive = google.drive({version: 'v3', auth:oAuth2Client});
         drive.about.get({fields:"user,storageQuota"}).then(data => {
           console.log(data)
           // Store the token in firebase
           const driveAbout = data.data;
-          driveAbout.storageQuota.usageInGB = getReadableFileSizeString(driveAbout.storageQuota.usageInDrive);
-          driveAbout.storageQuota.totalInGB = getReadableFileSizeString(driveAbout.storageQuota.limit);
+          driveAbout.storageQuota.usageInGB = CommonUtil.getReadableFileSizeString(driveAbout.storageQuota.usageInDrive);
+          driveAbout.storageQuota.totalInGB = CommonUtil.getReadableFileSizeString(driveAbout.storageQuota.limit);
+          driveAbout.user.token = token;
           updateDB('users' + '/akanabkhan' + '/drives', driveAbout.user.emailAddress.split('@')[0], driveAbout)
         })
 

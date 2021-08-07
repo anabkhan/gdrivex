@@ -40,10 +40,11 @@ export const DrivesView = () => {
                 const eachDrive = response.drives[key];
                 drives.push({
                     email: eachDrive.user.emailAddress,
-                    capacity: eachDrive.storageQuota.usageInDrive + "/" + eachDrive.storageQuota.totalInGB
+                    capacity: eachDrive.storageQuota.usageInGB + "/" + eachDrive.storageQuota.totalInGB
                 })
             });
             setDrives(drives)
+            console.log('drives', drives)
         })
     }, [])
 
@@ -85,7 +86,13 @@ export const DrivesView = () => {
                     <Add style={{color:'rgb(51, 103, 214)'}}/>
                     Add New Drive</span>
             </div>
-            <DriveItem email={'akanabkhan@gmail.com'} capacity={15} status={'connected'} />
+
+            {
+
+                drives.map(({email, capacity}) => (
+                    <DriveItem key={email} email={email} capacity={capacity} status={'connected'} />
+                ))
+            }
 
             <Modal
                 open={showAddDriveModal}

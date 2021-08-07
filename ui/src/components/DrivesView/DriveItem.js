@@ -22,6 +22,9 @@ const DriveItem = ({email,capacity, status}) => {
                         </>
                     )
                 }
+                <div className='driveItem-capacity'>
+                    <p>{capacity}</p>
+                </div>
             </div>
         </div>
     )

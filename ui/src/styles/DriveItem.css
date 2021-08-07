@@ -11,6 +11,11 @@
     flex: 1;
 }
 
+.driveItem--right {
+    align-items: center;
+    display: flex;
+}
+
 .driveItem--right>.MuiSvgIcon-root{
     margin-right: 20px;
 }
