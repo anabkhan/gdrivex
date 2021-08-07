@@ -1,8 +1,10 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import DriveItem from './DriveItem'
 import '../../styles/DrivesView.css'
 import { Add } from '@material-ui/icons'
 import { makeStyles, Modal } from '@material-ui/core'
+import { get } from '../../services/RestService'
+import { ADD_DRIVE, LIST_DRIVES, SUBMIT_AUTH } from '../../constants/REST_URLS'
 
 function getModalStyle() {
     return {
@@ -27,6 +29,24 @@ export const DrivesView = () => {
 
     const classes = useStyles();
 
+    const [drives, setDrives] = useState([]);
+
+    useEffect(() => {
+        get(LIST_DRIVES).then((response) => {
+            //const drives = response.drives;
+            const keys = Object.keys(response.drives);
+            const drives = [];
+            keys.forEach(key => {
+                const eachDrive = response.drives[key];
+                drives.push({
+                    email: eachDrive.user.emailAddress,
+                    capacity: eachDrive.storageQuota.usageInDrive + "/" + eachDrive.storageQuota.totalInGB
+                })
+            });
+            setDrives(drives)
+        })
+    }, [])
+
     const [modelStyle] = useState(getModalStyle);
 
     const [showAddDriveModal, setShowAddDriveModal] = useState(false)
@@ -34,6 +54,9 @@ export const DrivesView = () => {
     const [authCode, setAuthCode] = useState(null)
 
     const openAddDriveModal = () => {
+        get(ADD_DRIVE).then((data) => {
+            window.open(data.authUrl, "_blank")
+        })
         setShowAddDriveModal(true);
     }
 
@@ -43,6 +66,11 @@ export const DrivesView = () => {
 
     const submitAuthCode = () => {
         console.log('auth code : ', authCode)
+        const authCodeUrl = `${SUBMIT_AUTH}?code=${authCode}`;
+        get(authCodeUrl).then((data) => {
+            console.log(data)
+            handleClose()
+        })
     }
 
     const handleTextChange = (e) => {

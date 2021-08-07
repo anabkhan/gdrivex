@@ -5,6 +5,8 @@ const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
 const { send } = require('process');
+const { updateDB, getData } = require('./services/fireabse');
+const { getReadableFileSizeString } = require('./services/commonutil');
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
 
@@ -30,13 +32,13 @@ app.get('/addDrive', async (req, res) => {
         // Authorize a client with credentials, then call the Google Drive API.
         oAuth2Client = authorize(JSON.parse(content));
 
-        res.send(getURLForAccessToken(oAuth2Client))
+        res.send({authUrl:getURLForAccessToken(oAuth2Client)})
     });
 });
 
 
 app.get('/submitAuthCode', async (req, res) => {
-    oAuth2Client.getToken(req.params.code, (err, token) => {
+    oAuth2Client.getToken(req.query.code, (err, token) => {
         if (err) {
             res.status(400).send('Failed ' + err)
         };
@@ -46,9 +48,38 @@ app.get('/submitAuthCode', async (req, res) => {
           if (err) return console.error(err);
           console.log('Token stored to', TOKEN_PATH);
         });
-        res.send('Success')
+
+        const drive = google.drive({version: 'v3', auth:oAuth2Client});
+        drive.about.get({fields:"user,storageQuota"}).then(data => {
+          console.log(data)
+          // Store the token in firebase
+          const driveAbout = data.data;
+          driveAbout.storageQuota.usageInGB = getReadableFileSizeString(driveAbout.storageQuota.usageInDrive);
+          driveAbout.storageQuota.totalInGB = getReadableFileSizeString(driveAbout.storageQuota.limit);
+          updateDB('users' + '/akanabkhan' + '/drives', driveAbout.user.emailAddress.split('@')[0], driveAbout)
+        })
+
+        res.send({status:'Success'})
       });
 });
+
+app.get('/listDrives', async(req, res) => {
+  getData('users/' + 'akanabkhan' + '/drives/', (drives) => {
+    res.send({status:'Success', drives})
+  }, (error) => {
+    console.log(error)
+    res.status(400).send({status:'Failure', message:error})
+  });
+});
+
+// function listDrives(user) {
+//   getData('users/' + user + '/drives/', (drives) => {
+
+//   }, (error) => {
+//     console.log(error)
+//     res.status(400).send({status:'Failure', message:error})
+//   });
+// }
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
