@@ -25,9 +25,7 @@ module.exports.FileService = {
                         let index = 0;
                         schema.uploadTask.clustors.forEach(clustor => {
                             size = size + clustor.fileSize;
-                            if (index > 0) {
-                                handleFileUploadForClustor(url, clustor, offset, size, info)
-                            }
+                            handleFileUploadForClustor(url, clustor, offset, size, info)
                             offset = offset + clustor.fileSize;
                             index++;
                         });
@@ -65,67 +63,6 @@ function getFileInfoFromURL(url, onData, onError) {
         });
         r.on('error', error=>onError(error))
 }
-
-/*function handleFileUploadForClustor(url, clustor, offset, size, file) {
-
-    const chunkSize = 1000000;
-    var numberofChunks = Math.ceil(size / chunkSize);
-
-    var chunkStart = offset;
-    var chunkEnd = Math.min(offset + chunkSize, size);
-
-    var readStream = new Stream.Readable({
-        read() {}
-    });
-
-    const data = new Stream.PassThrough();
-
-    // readStream.on('data', (data) => {
-    //     console.log('data recieved')
-    // })
-
-    const writableStream = new Stream.Writable()
-
-    writableStream._write = (chunk, encoding, next) => {
-        // console.log(chunk.toString())
-        data.push(chunk)
-        next()
-    }
-
-    readStream.pipe(data)
-
-    GDriveXService.uploadFile(data, (output) => {
-        console.log(output)
-    }, (error) => {
-        console.log(error)
-    })
-
-    for (let index = 0; index < numberofChunks; index++) {
-        request({
-            headers: {
-                'Content-Length': chunkEnd,
-                Range: `bytes=${chunkStart}-${chunkEnd}`
-            },
-            uri: url,
-            method: 'GET'
-        }, function (err, res, body) {
-            if (index >= numberofChunks) {
-                writableStream.end()
-            }
-            // console.log('res', res)
-            // console.log('body', body)
-            // console.log('err', err)
-        })
-        // .on('data', (buffer) => {
-        //     data.push(buffer)
-        // })
-        .pipe(readStream)
-
-        chunkStart = chunkEnd+1;
-        chunkEnd = Math.min(chunkSize + chunkEnd, size);
-    }
-}*/
-
 
 function handleFileUploadForClustor(url, clustor, offset, size, file) {
 
@@ -193,11 +130,20 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
             GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
             }, (response) => {
-                // File successfully uploaded
-                // Update the uploadTask
-                clustor.completed = true;
-                GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
-                console.log(response)
+                try {
+                    response = JSON.parse(response);
+                    if (response && response.id) {
+                        // File successfully uploaded
+                        // Update the uploadTask
+                        clustor.completed = true;
+                        GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
+                        console.log(response)
+                        clustor.fileID = response.id;
+                        GDriveXService.updateClustorOfSchema(fileNameKey, clustor)
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
             })
 
         } , null);

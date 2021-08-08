@@ -139,7 +139,8 @@ module.exports.GDriveXService = {
                     updateDB(dbPaths.files(), fileNameKey, schema)
 
                     // return the schema
-                    onSchema(schema)
+                    // onSchema(schema)
+                    return this.GDriveXService.getOrGenerateSchema(file, onSchema, onError)
                 }, (error) => {
                     onError(error)
                 })
@@ -150,7 +151,7 @@ module.exports.GDriveXService = {
     },
 
     getResumableSessionURI: (clustor, fileMetaData, onError, onResponse) => {
-        getData(dbPaths.uploadTaskClustors(CommonUtil.generateKeyForFileName(fileMetaData.name)) + `/${clustor.index}/resumableUri`,(resumableUri) => {
+        getData(dbPaths.uploadTaskClustors(CommonUtil.generateKeyForFileName(fileMetaData.name)) + `/${clustor.index}/resumableUri`,(resumableUri) => {    
             onResponse(resumableUri)
         }, (error) => {
             getAccessToken(clustor.drive, (token) => {
@@ -161,11 +162,7 @@ module.exports.GDriveXService = {
                           "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
                         headers: {
                           'Authorization': `Bearer ${token.access_token}`,
-                          'Content-Type': "application/json",
-                        //   'X-Upload-Content-Length': clustor.fileSize,
-                        //   'X-Upload-Content-Type' : 'audio/mp3'
-                        //   'Content-Length': 0
-                        //   'Content-Length': fileMetaData.size
+                          'Content-Type': "application/json"
                         },
                         body: JSON.stringify({
                             name:fileMetaData.name,
@@ -176,6 +173,7 @@ module.exports.GDriveXService = {
                             onError(error)
                         } else {
                             response.token = token;
+                            // onResponse({resumableUri: response.headers.location})
                             onResponse(response.headers.location)
                         }
                     }
@@ -236,6 +234,10 @@ module.exports.GDriveXService = {
 
     updateClustorOfUploadTask: (key, clustor) => {
         updateDB(dbPaths.uploadTaskClustors(key), clustor.index, clustor);
+    },
+
+    updateClustorOfSchema: (key, clustor) => {
+        updateDB(dbPaths.fileSchema(key) + '/clustors', clustor.index, clustor);
     }
 }
 
