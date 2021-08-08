@@ -145,7 +145,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
         // Update uploadTask clustor with resumable URI
         clustor.resumableUri = resumableUri;
         GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor);
-        GDriveXService.getFileResumeStatus(resumableUri, (response) => {
+        GDriveXService.getFileResumeStatus(clustor.drive, resumableUri, (response) => {
             // console.log(response)
             let nextOffset = 0;
             switch (response.statusCode) {
@@ -175,6 +175,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
             //     console.log(response)
             // })
 
+            const fileDataStream = new Stream.PassThrough();
             request({
                 headers: {
                     'Content-Length': size,
@@ -183,36 +184,19 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                 uri: url,
                 method: 'GET',
                 encoding: null
-            }, (error, response, body) => {
-                if (error && response.statusCode != 200) {
-                    reject(error);
-                    return;
-                }
-                //   resolve(body);
-                const fileDataStream = new Stream.PassThrough();
-                fileDataStream.end(body)
-                GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, size, body, clustor.drive, (error)=> {
-                    console.error(error)
-                }, (response) => {
-                    // File successfully uploaded
-                    console.log(response)
-                })
+            }
+            )
+            .pipe(fileDataStream)
 
+            GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, size, fileDataStream, clustor.drive, (error)=> {
+                console.error(error)
+            }, (response) => {
+                // File successfully uploaded
+                console.log(response)
             })
-            //.pipe(fileDataStream)
 
         } , null);
     })
-
-    // request({
-    //     headers: {
-    //         'Content-Length': size,
-    //         Range: `bytes=${offset}-${size-1}`
-    //     },
-    //     uri: url,
-    //     method: 'GET'
-    // }).pipe(fileDataStream)
-
     // chunkStart = chunkEnd+1;
     // chunkEnd = Math.min(chunkSize + chunkEnd, size);
 }

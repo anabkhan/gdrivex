@@ -180,27 +180,27 @@ module.exports.GDriveXService = {
         })
     },
 
-    getFileResumeStatus: (resumableUri, onResponse, onError) => {
+    getFileResumeStatus: (drive, resumableUri, onResponse, onError) => {
 
-        onResponse({
-            statusCode: 400
-        })
-        // request(
-        //     {
-        //         method: "PUT",
-        //         url: resumableUri,
-        //         headers: {
-        //             'Content-Range': '*/*',
-        //             'Content-Length': 0
-        //         }
-        //     }, (error , response) => {
-        //         if (error) {
-        //             onError(error)
-        //         } else {
-        //             onResponse(response)
-        //         }
-        //     }
-        // )
+        getAccessToken(drive, (token) => {
+            request(
+                {
+                    method: "PUT",
+                    url: resumableUri,
+                    headers: {
+                        'Authorization': `Bearer ${token.access_token}`,
+                        'Content-Range': '*/*',
+                        'Content-Length': 0
+                    }
+                }, (error , response) => {
+                    if (error) {
+                        onError(error)
+                    } else {
+                        onResponse(response)
+                    }
+                }
+            )
+        }, onError)
     },
 
     // createFile: (driveUser, fileMetada, ) => {
@@ -208,8 +208,6 @@ module.exports.GDriveXService = {
     // },
 
     uploadOrResumeFile: (resumableUri, offset, size, fileDataStream, drive, onError, onSuccess) => {
-        const fileSize = fs.statSync("delicate.mp3").size;
-        const fileRead = fs.readFileSync('delicate.mp3');
         getAccessToken(drive, (token) => {
             request(
                 {
