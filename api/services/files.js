@@ -168,13 +168,6 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                     break;
             }
 
-            // GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, size, null, clustor.drive, (error)=> {
-            //     console.error(error)
-            // }, (response) => {
-            //     // File successfully uploaded
-            //     console.log(response)
-            // })
-
             const fileDataStream = new Stream.PassThrough();
             request({
                 headers: {
@@ -184,14 +177,18 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                 uri: url,
                 method: 'GET',
                 encoding: null
-            }
-            )
-            .pipe(fileDataStream)
+            }).pipe(fileDataStream)
+
+            clustor.started = true;
+            GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
 
             GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, size, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
             }, (response) => {
                 // File successfully uploaded
+                // Update the uploadTask
+                clustor.completed = true;
+                GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
                 console.log(response)
             })
 
