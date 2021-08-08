@@ -120,14 +120,18 @@ module.exports.GDriveXService = {
                     const fileSize = file.size;
                     let remainingSize = fileSize;
                     drives.every((drive, index) => {
+                        // const availableDriveSpace = drive.availableSpace;
+
+                        // To try part upload of file, simulate a scenario of limited space
+                        const availableDriveSpace = 5000000;
                         schema.clustors.push({
                             index,
                             drive:drive.email.split('@')[0],
                             fileID: null,       // to be updated by upload task
                             linkToFile: null,   // to be updated by upload task
-                            fileSize: remainingSize > drive.availableSpace ? drive.availableSpace : remainingSize
+                            fileSize: remainingSize > availableDriveSpace ? availableDriveSpace : remainingSize
                         })
-                        remainingSize = remainingSize - drive.availableSpace;
+                        remainingSize = remainingSize - availableDriveSpace;
                         return !(remainingSize <= 0);
                     });
 
@@ -158,8 +162,8 @@ module.exports.GDriveXService = {
                         headers: {
                           'Authorization': `Bearer ${token.access_token}`,
                           'Content-Type': "application/json",
-                          'X-Upload-Content-Length': clustor.fileSize,
-                          'X-Upload-Content-Type' : 'audio/mp3'
+                        //   'X-Upload-Content-Length': clustor.fileSize,
+                        //   'X-Upload-Content-Type' : 'audio/mp3'
                         //   'Content-Length': 0
                         //   'Content-Length': fileMetaData.size
                         },
@@ -182,25 +186,29 @@ module.exports.GDriveXService = {
 
     getFileResumeStatus: (drive, resumableUri, onResponse, onError) => {
 
-        getAccessToken(drive, (token) => {
-            request(
-                {
-                    method: "PUT",
-                    url: resumableUri,
-                    headers: {
-                        'Authorization': `Bearer ${token.access_token}`,
-                        'Content-Range': '*/*',
-                        'Content-Length': 0
-                    }
-                }, (error , response) => {
-                    if (error) {
-                        onError(error)
-                    } else {
-                        onResponse(response)
-                    }
-                }
-            )
-        }, onError)
+        onResponse({
+            statusCode: 400
+        })
+
+        // getAccessToken(drive, (token) => {
+        //     request(
+        //         {
+        //             method: "PUT",
+        //             url: resumableUri,
+        //             headers: {
+        //                 'Authorization': `Bearer ${token.access_token}`,
+        //                 'Content-Range': '*/*',
+        //                 'Content-Length': 0
+        //             }
+        //         }, (error , response) => {
+        //             if (error) {
+        //                 onError(error)
+        //             } else {
+        //                 onResponse(response)
+        //             }
+        //         }
+        //     )
+        // }, onError)
     },
 
     // createFile: (driveUser, fileMetada, ) => {

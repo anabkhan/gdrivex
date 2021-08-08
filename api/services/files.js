@@ -22,10 +22,14 @@ module.exports.FileService = {
                         onError(CommonUtil.createFailureMessage(Messages.FILE_FAILED_EXISTS))
                     } else {
                         let offset = 0, size = 0;
-                        schema.uploadTask.clustors.every((clustor, index) => {
+                        let index = 0;
+                        schema.uploadTask.clustors.forEach(clustor => {
                             size = size + clustor.fileSize;
-                            handleFileUploadForClustor(url, clustor, offset, size, info)
-                            offset = offset + clustor.fileSize + 1;
+                            if (index > 0) {
+                                handleFileUploadForClustor(url, clustor, offset, size, info)
+                            }
+                            offset = offset + clustor.fileSize;
+                            index++;
                         });
                     }
                 }
@@ -136,7 +140,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
     GDriveXService.getResumableSessionURI(clustor, {
         name: file.name,
         mimeType: file.mimeType ? file.mimeType : 'application/octet-stream',
-        size:size
+        size:clustor.fileSize
     }, (error) => {
         // What to do with this error?
         // Update the updaoad task clustor status as failed?
@@ -171,7 +175,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
             const fileDataStream = new Stream.PassThrough();
             request({
                 headers: {
-                    'Content-Length': size,
+                    // 'Content-Length': size,
                     Range: `bytes=${offset + nextOffset}-${size-1}`
                 },
                 uri: url,
@@ -179,10 +183,14 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                 encoding: null
             }).pipe(fileDataStream)
 
+            // fileDataStream.on('data', (data) => {
+            //     console.log(data)
+            // })
+
             clustor.started = true;
             GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
 
-            GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, size, fileDataStream, clustor.drive, (error)=> {
+            GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
             }, (response) => {
                 // File successfully uploaded
