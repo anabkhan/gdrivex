@@ -1,7 +1,10 @@
+const request = require("request")
 const { dbPaths } = require("../constants/FIREBASE_DB_PATHS")
 const { Messages } = require("../constants/Messages")
+const { CommonUtil } = require("./commonutil")
 const { getData, updateDB } = require("./fireabse")
 const { GDriveService } = require("./gdrive")
+const fs = require('fs');
 
 module.exports.GDriveXService = {
 
@@ -22,8 +25,8 @@ module.exports.GDriveXService = {
 
     uploadFile: (fileStream, onOutput, onError) => {
         GDriveService.uploadFile('akanabkhan', fileStream, {
-            name: 'TestFileName.png',
-            mimeType: 'image/png'
+            name: 'Delicate.mp3',
+            mimeType: 'audio/mp3'
         }, onOutput, onError)
     },
 
@@ -80,7 +83,7 @@ module.exports.GDriveXService = {
      * @param {*} onError 
      */
     getOrGenerateSchema: (file, onSchema, onError) => {
-        const fileNameKey = file.name.split('.').join('-*-');
+        const fileNameKey = CommonUtil.generateKeyForFileName(file.name);
         getData(dbPaths.fileSchema(fileNameKey), (schema) => {
             getData(dbPaths.uploadTask(fileNameKey), (uploadTask) => {
                 schema = {...schema, uploadTask}
@@ -119,7 +122,7 @@ module.exports.GDriveXService = {
                     drives.every((drive, index) => {
                         schema.clustors.push({
                             index,
-                            drive:drive.email,
+                            drive:drive.email.split('@')[0],
                             fileID: null,       // to be updated by upload task
                             linkToFile: null,   // to be updated by upload task
                             fileSize: remainingSize > drive.availableSpace ? drive.availableSpace : remainingSize
@@ -140,5 +143,150 @@ module.exports.GDriveXService = {
                 onError(error)
             }
         })
+    },
+
+    getResumableSessionURI: (clustor, fileMetaData, onError, onResponse) => {
+        getData(dbPaths.uploadTaskClustors(CommonUtil.generateKeyForFileName(fileMetaData.name)) + `/${clustor.index}/resumableUri`,(resumableUri) => {
+            onResponse(resumableUri)
+        }, (error) => {
+            getAccessToken(clustor.drive, (token) => {
+                request(
+                    {
+                        method: "POST",
+                        url:
+                          "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
+                        headers: {
+                          'Authorization': `Bearer ${token.access_token}`,
+                          'Content-Type': "application/json",
+                          'X-Upload-Content-Length': clustor.fileSize,
+                          'X-Upload-Content-Type' : 'audio/mp3'
+                        //   'Content-Length': 0
+                        //   'Content-Length': fileMetaData.size
+                        },
+                        body: JSON.stringify({
+                            name:fileMetaData.name,
+                            mimeType: 'audio/mp3'
+                        })
+                    }, (error, response) => {
+                        if (error) {
+                            onError(error)
+                        } else {
+                            response.token = token;
+                            onResponse(response.headers.location)
+                        }
+                    }
+                )
+            }, onError)
+        })
+    },
+
+    getFileResumeStatus: (resumableUri, onResponse, onError) => {
+
+        onResponse({
+            statusCode: 400
+        })
+        // request(
+        //     {
+        //         method: "PUT",
+        //         url: resumableUri,
+        //         headers: {
+        //             'Content-Range': '*/*',
+        //             'Content-Length': 0
+        //         }
+        //     }, (error , response) => {
+        //         if (error) {
+        //             onError(error)
+        //         } else {
+        //             onResponse(response)
+        //         }
+        //     }
+        // )
+    },
+
+    // createFile: (driveUser, fileMetada, ) => {
+
+    // },
+
+    uploadOrResumeFile: (resumableUri, offset, size, fileDataStream, drive, onError, onSuccess) => {
+        const fileSize = fs.statSync("delicate.mp3").size;
+        const fileRead = fs.readFileSync('delicate.mp3');
+        getAccessToken(drive, (token) => {
+            request(
+                {
+                    method: "PUT",
+                    url: resumableUri,
+                    headers: { 'Authorization': `Bearer ${token.access_token}`, "Content-Range": `bytes ${offset}-${size - 1}/${size}`, "Content-Length": size },
+                    body: fileDataStream
+                }, (error, response, body) => {
+                    if (error) {
+                        onError(error)
+                    } else {
+                        onSuccess(body)
+                    }
+                }
+            )
+        }, null)
+    },
+
+    updateClustorOfUploadTask: (key, clustor) => {
+        updateDB(dbPaths.uploadTaskClustors(key), clustor.index, clustor);
     }
+}
+
+function getAccessToken(drive, onSuccess, onError) {
+    getData(`${dbPaths.userDrive(drive)}/user/token`, (token) => {
+        if ((token.expiry_date - Date.now()) > 60000) {
+            // token is still valid
+            onSuccess(token)
+        } else {
+            // token has expired, get new token
+            CommonUtil.getCredentials((credentials) => {
+                oAuth2Client = GDriveService.authorize(credentials);
+                oAuth2Client.setCredentials(token);
+
+                oAuth2Client.refreshAccessToken((err, credentials, res) => {
+                    if (err) {
+                        onError(err)
+                    } else {
+                        token.access_token = credentials.access_token
+                        token.expiry_date = credentials.expiry_date
+                        updateUserToken(drive, token)
+                        onSuccess(token)
+                    }
+                })
+            })
+
+                /*
+                request(
+                    {
+                        method: "POST",
+                        url:
+                          "https://www.googleapis.com/oauth2/v4/token",
+                        headers: {
+                          'Content-Type': "application/x-www-form-urlencoded"
+                        },
+                        body: JSON.stringify({
+                            client_id: credentials.client_id,
+                            client_secret: credentials.client_secret,
+                            refresh_token: token.refresh_token,
+                            grant_type: 'refresh_token'
+                        })
+                    }, (error, response, body) => {
+                        if (error) {
+                            onError(error)
+                        } else {
+                            token.access_token = body.access_token
+                            token.expiry_date = expires_in
+                            updateUserToken(drive, token)
+                            onSuccess(token)
+                        }
+                    }
+                );
+                */
+        }
+    }, onError)  
+}
+
+function updateUserToken(driveUser, token) {
+    updateDB(`${dbPaths.userDrive(driveUser)}/user`, 'token', token)
 }

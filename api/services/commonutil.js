@@ -1,3 +1,4 @@
+const fs = require('fs');
 module.exports.CommonUtil = {
     getReadableFileSizeString: (fileSizeInBytes) => {
         let i = -1;
@@ -23,5 +24,15 @@ module.exports.CommonUtil = {
             status:'Fail',
             message
         }
+    },
+
+    generateKeyForFileName: (fileName) => {
+        return fileName.split('.').join('-*-')
+    },
+
+    getCredentials: (onSuccess) => {
+        fs.readFile('credentials.json', (err, content) => {
+            onSuccess(JSON.parse(content))
+        });
     }
 }

@@ -9,6 +9,7 @@ const { updateDB, getData } = require('./services/fireabse');
 const { CommonUtil } = require('./services/commonutil');
 const { GDriveXService } = require('./services/gdrivex');
 const { Readable, Stream } = require('stream');
+const { FileService } = require('./services/files');
 app.use(express.json());
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
@@ -85,8 +86,12 @@ app.post('/getSchema', async (req, res) => {
 });
 
 app.post('/createUploadTask', async (req, res) => {
-  
+  FileService.downloadFromURL(req.query.url, req.query.fileName, (error) => {
+    res.status(400).send(CommonUtil.createFailureMessage(error))
+  })
+  res.send()
 })
+
 
 
 app.post('/uploadFile', async (req, res) => {

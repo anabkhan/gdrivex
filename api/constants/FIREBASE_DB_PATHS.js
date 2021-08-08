@@ -7,7 +7,8 @@ module.exports.dbPaths = {
     fileSchema,
     files,
     uploadTask,
-    uploadTasks
+    uploadTasks,
+    uploadTaskClustors
 }
 
 function drives() {
@@ -40,4 +41,8 @@ function uploadTasks() {
 
 function uploadTask(fileNameKey) {
     return uploadTasks() + "/" + fileNameKey;
+}
+
+function uploadTaskClustors(fileNameKey) {
+    return `${uploadTask(fileNameKey)}/clustors`;
 }

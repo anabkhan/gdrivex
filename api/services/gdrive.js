@@ -4,19 +4,33 @@ const fs = require('fs');
 const {google} = require('googleapis');
 
 module.exports.GDriveService = {
-    uploadFile : (driveUser, fileStream, metadata, onOutput, onError) => {
+    uploadFile : (fileId, driveUser, fileStream, metadata, onOutput, onError) => {
         getDriveObject(driveUser, async (drive) => {
             try {
-                const response = await drive.files.create({
-                      requestBody: metadata,
-                      media: {
-                          mimeType: metadata.mimeType,
-                          body: fileStream,
-                      },
-                  });  
-                  // report the response from the request
-                  console.log(response.data);
-                  onOutput(response.data);
+                let response;
+                if (fileId) {
+                    // Update File
+                    response = await drive.files.update({
+                        requestBody: metadata,
+                        fileId,
+                        media: {
+                            mimeType: metadata.mimeType,
+                            body: fileStream,
+                        },
+                    });
+                } else {
+                    // Create File
+                    response = await drive.files.create({
+                          requestBody: metadata,
+                          media: {
+                              mimeType: metadata.mimeType,
+                              body: fileStream,
+                          },
+                    });  
+                }
+                // report the response from the request
+                console.log(response.data);
+                onOutput(response.data);
               } catch (error) {
                   //report the error message
                   console.log(error.message);
@@ -24,7 +38,8 @@ module.exports.GDriveService = {
               }
         })
     },
-    getAccessToken: getAccessToken
+    getAccessToken: getAccessToken,
+    authorize
 }
 
 function getDriveObject(driveUser, onDrive) {
