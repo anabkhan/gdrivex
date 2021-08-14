@@ -2,7 +2,7 @@ const { dbPaths } = require("../constants/FIREBASE_DB_PATHS")
 const { getData } = require("./fireabse")
 const fs = require('fs');
 const {google} = require('googleapis');
-
+const { UserService } = require("./users");
 module.exports.GDriveService = {
     uploadFile : (fileId, driveUser, fileStream, metadata, onOutput, onError) => {
         getDriveObject(driveUser, async (drive) => {
@@ -39,11 +39,17 @@ module.exports.GDriveService = {
         })
     },
     getAccessToken: getAccessToken,
-    authorize
+    authorize,
+    getDriveObjectOfLoggedInUser,
+    getDriveObject
+}
+
+function getDriveObjectOfLoggedInUser (onDrive) {
+    getDriveObject(UserService.getLoggedInUser().username, onDrive)
 }
 
 function getDriveObject(driveUser, onDrive) {
-    getAccessToken(driveUser, (token) => {
+    GDriveXService.getAccessToken(driveUser, (token) => {
         fs.readFile('credentials.json', (err, content) => {
             if (err) return console.log('Error loading client secret file:', err);
             // Authorize a client with credentials, then call the Google Drive API.
@@ -53,9 +59,20 @@ function getDriveObject(driveUser, onDrive) {
             const drive = google.drive({version: 'v3', auth:oAuth2Client});
             onDrive(drive)
         });
-    }, (err) => {
-        console.log(err)
-    })
+    }, (err) => {console.log(err)})
+    // getAccessToken(driveUser, (token) => {
+    //     fs.readFile('credentials.json', (err, content) => {
+    //         if (err) return console.log('Error loading client secret file:', err);
+    //         // Authorize a client with credentials, then call the Google Drive API.
+    //         oAuth2Client = authorize(JSON.parse(content));
+    //         oAuth2Client.setCredentials(token);
+
+    //         const drive = google.drive({version: 'v3', auth:oAuth2Client});
+    //         onDrive(drive)
+    //     });
+    // }, (err) => {
+    //     console.log(err)
+    // })
 }
 
 function getAccessToken(driveUser, onTokenRecieved, onError) {

@@ -92,6 +92,12 @@ app.post('/createUploadTask', async (req, res) => {
   res.send()
 })
 
+app.get('/downloadFile', async (req, res) => {
+  FileService.downloadFile(req.query.name, req, res, (error) => {
+    res.status(400).send(CommonUtil.createFailureMessage(error))
+  })
+})
+
 
 
 app.post('/uploadFile', async (req, res) => {

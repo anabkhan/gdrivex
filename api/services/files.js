@@ -4,6 +4,8 @@ const { CommonUtil } = require('./commonutil');
 const { GDriveXService } = require('./gdrivex');
 const { Stream } = require('stream');
 const { GDriveService } = require('./gdrive');
+const { getData } = require('./fireabse');
+const { dbPaths } = require('../constants/FIREBASE_DB_PATHS');
 
 module.exports.FileService = {
     downloadFromURL: (url, fileName,  onError) => {
@@ -37,6 +39,97 @@ module.exports.FileService = {
 
     downloadFromTorrent: (magnet) => {
 
+    },
+
+    downloadFile: (fileName, req, res, onError) => {
+        getFileSchemaFromName(fileName, (fileSchema) => {
+
+            const range = req.headers.range;
+            const total = fileSchema.file.size;
+
+            var positions = (range? range : 'bytes=0-').replace(/bytes=/, "").split("-");
+            var start = parseInt(positions[0], 10);
+            var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+            var chunksize = (end - start) + 1;
+
+            res.writeHead(range ? 206 : 200, {
+                "Content-Range": "bytes " + start + "-" + end + "/" + total,
+                "Accept-Ranges": "bytes",
+                "Content-Length": chunksize,
+                "Content-Type": "video/" + fileName.split('.').pop(),
+                "Content-Disposition": "attachment; filename="+fileName,
+            });
+
+            const readableStream = new Stream.Readable({
+                read() {
+                    console.log('reading data')
+                }
+            })
+
+            readableStream.pipe(res);
+
+            startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, 0, onError);
+        }, onError)
+    }
+}
+
+function getFileSchemaFromName(fileName, onFileSchema, onError) {
+    getData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(fileName)), onFileSchema, onError);
+}
+
+function startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, clustorIndex, onError) {
+    let writableStream = new Stream.Writable()
+    writableStream._write = (chunk, encoding, next) => {
+        readableStream.push(chunk, encoding)
+        next()
+    }
+
+    req.on("close", function() {
+        console.log('request closed by client');
+        readableStream.destroy();
+        writableStream.destroy();
+    });
+
+
+    // let clustorindex = 0;
+    let clustorindex = startDownloadingFromClustor(fileSchema.clustors, clustorIndex, start, chunksize, writableStream, onError)
+    writableStream.on('finish', () => {
+        console.log('writing finishedf for clustor ' + clustorindex);
+        clustorindex++;
+        if (clustorindex < fileSchema.clustors.length) {
+            // download from next clustor
+            startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, clustorindex, onError)
+        } else {
+            res.end();
+        }
+    })
+}
+
+function startDownloadingFromClustor(clustors, clustorindex, offset, chunksize, writableStream, onError) {
+    const clustor = clustors[clustorindex];
+    if (clustor.completed) {
+        const fileId = clustor.fileID;
+        if (offset < (clustor.fileSize - 1)) {
+            GDriveXService.getDriveObject(clustor.drive, (drive) => {
+                drive.files.get(
+                    { fileId: fileId, alt: 'media', headers: { "Range": `bytes=${offset}-${(chunksize - 1) + offset}` } },
+                    { responseType: 'stream', },
+                    (err, result) => {
+                        if (err) {
+                            onError(err)
+                        } else {
+                            result.data.pipe(writableStream)
+                        }
+                    }
+                );
+            })
+            return clustorindex;
+            } else {
+            offset = offset - clustor.fileSize;
+            return startDownloadingFromClustor(clustors, clustorindex + 1, offset, chunksize, writableStream, onError)
+        }
+    } else {
+        onError("File was not uploaded properly. Resume it from the upload task")
     }
 }
 

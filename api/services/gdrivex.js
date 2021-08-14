@@ -5,6 +5,8 @@ const { CommonUtil } = require("./commonutil")
 const { getData, updateDB } = require("./fireabse")
 const { GDriveService } = require("./gdrive")
 const fs = require('fs');
+const { UserService } = require("./users")
+const {google} = require('googleapis');
 
 module.exports.GDriveXService = {
 
@@ -238,7 +240,9 @@ module.exports.GDriveXService = {
 
     updateClustorOfSchema: (key, clustor) => {
         updateDB(dbPaths.fileSchema(key) + '/clustors', clustor.index, clustor);
-    }
+    },
+
+    getDriveObject
 }
 
 function getAccessToken(drive, onSuccess, onError) {
@@ -297,4 +301,29 @@ function getAccessToken(drive, onSuccess, onError) {
 
 function updateUserToken(driveUser, token) {
     updateDB(`${dbPaths.userDrive(driveUser)}/user`, 'token', token)
+}
+
+
+function getDriveObject(driveUser, onDrive) {
+    if (!driveUser) {
+        driveUser = UserService.getLoggedInUser().username;
+    }
+    getAccessToken(driveUser, (token) => {
+        fs.readFile('credentials.json', (err, content) => {
+            if (err) return console.log('Error loading client secret file:', err);
+            // Authorize a client with credentials, then call the Google Drive API.
+            oAuth2Client = authorize(JSON.parse(content));
+            oAuth2Client.setCredentials(token);
+
+            const drive = google.drive({version: 'v3', auth:oAuth2Client});
+            onDrive(drive)
+        });
+    }, (err) => {console.log(err)})
+}
+
+function authorize(credentials) {
+    const {client_secret, client_id, redirect_uris} = credentials.installed;
+    const oAuth2Client = new google.auth.OAuth2(
+        client_id, client_secret, redirect_uris[0]);
+    return oAuth2Client;
 }
