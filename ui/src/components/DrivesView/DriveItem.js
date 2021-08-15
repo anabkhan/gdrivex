@@ -3,9 +3,9 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import '../../styles/DriveItem.css'
 
-const DriveItem = ({email,capacity, status}) => {
+const DriveItem = ({email,capacity, usedPercentage, status}) => {
     return (
-        <div className='driveItem'>
+        <div className='driveItem' style={{background:`linear-gradient(to right, rgb(237, 237, 237) ${usedPercentage}%, white 0%)`}}>
             <div className='driveItem--left'>
                 <p>{email}</p>
             </div>

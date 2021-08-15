@@ -98,6 +98,14 @@ app.get('/downloadFile', async (req, res) => {
   })
 })
 
+app.get('/listFiles', async (req,res) => {
+  FileService.listFiles(null, null, (data) => {
+    res.send(CommonUtil.createSuccessMessage(data, "List of files"))
+  }, (err) => {
+    res.status(400).send(CommonUtil.createFailureMessage(err))
+  })
+})
+
 
 
 app.post('/uploadFile', async (req, res) => {

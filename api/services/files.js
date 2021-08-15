@@ -70,6 +70,10 @@ module.exports.FileService = {
 
             startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, 0, onError);
         }, onError)
+    },
+
+    listFiles: (start, size, onSuccess, onError) => {
+        getData(dbPaths.files(), onSuccess, onError)
     }
 }
 

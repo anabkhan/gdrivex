@@ -2,8 +2,11 @@
     display: flex;
     align-items: center;
     height: 55px;
-    border-bottom: 1px solid rgb(291, 219, 219);
-    border-top: 1px solid rgb(291, 219, 219);
+    /* border-bottom: 1px solid #dadce0; */
+    /* background: linear-gradient(to right, #dadce0 100%, white 0%); */
+    margin: 5px 0 5px 0px;
+    /* border-top: 1px solid rgb(0, 0, 0); */
+    /* border-top: 1px solid rgb(0, 0, 0); */
     /* width: 100%; */
 }
 
@@ -11,10 +14,17 @@
     flex: 1;
 }
 
+.driveItem--left>p{
+    margin-left: 10px;
+}
+
+
 .driveItem--right {
     align-items: center;
     display: flex;
+    margin-right: 10px;
 }
+
 
 .driveItem--right>.MuiSvgIcon-root{
     margin-right: 20px;

@@ -40,7 +40,8 @@ export const DrivesView = () => {
                 const eachDrive = response.drives[key];
                 drives.push({
                     email: eachDrive.user.emailAddress,
-                    capacity: eachDrive.storageQuota.usageInGB + "/" + eachDrive.storageQuota.totalInGB
+                    capacity: eachDrive.storageQuota.usageInGB + "/" + eachDrive.storageQuota.totalInGB,
+                    usedPercentage: ((parseInt(eachDrive.storageQuota.usage, 10) / parseInt(eachDrive.storageQuota.limit, 10)) * 100)
                 })
             });
             setDrives(drives)
@@ -89,8 +90,8 @@ export const DrivesView = () => {
 
             {
 
-                drives.map(({email, capacity}) => (
-                    <DriveItem key={email} email={email} capacity={capacity} status={'connected'} />
+                drives.map(({email, capacity, usedPercentage}) => (
+                    <DriveItem key={email} email={email} capacity={capacity} usedPercentage={usedPercentage} status={'connected'} />
                 ))
             }
 

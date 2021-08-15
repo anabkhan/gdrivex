@@ -115,7 +115,7 @@ module.exports.GDriveXService = {
                 
                 // Schema doesn't exists , lets create one
                 let schema = {
-                    file,
+                    file: {...file,timestamp:Date.now()},
                     clustors: []
                 };
                 this.GDriveXService.listDrivesAsArray((drives) => {

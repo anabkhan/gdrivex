@@ -1,7 +1,8 @@
 .fileItem{
     height: 55px;
-    border-bottom: 1px solid rgb(291, 219, 219);
-    border-top: 1px solid rgb(291, 219, 219);
+    border-bottom: 1px solid #dadce0;
+    /* border-top: 1px solid rgb(0, 0, 0); */
+    /* border-top: 1px solid rgb(291, 219, 219); */
     width: 100%;
 }
 

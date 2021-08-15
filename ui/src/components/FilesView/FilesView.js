@@ -3,18 +3,36 @@ import {db} from '../../firebase'
 import FileItem from './FileItem'
 import '../../styles/FilesView.css';
 import { FileCard } from './FileCard';
+import { get } from '../../services/RestService';
+import { LIST_FILES } from '../../constants/REST_URLS';
 
 export const FilesView = () => {
     const [files, setFiles] = useState([])
 
     useEffect(() => {
-        db.collection('myFiles').onSnapshot(snapshot => {
-            console.log('got the files', snapshot)
-            setFiles(snapshot.docs.map(doc => ({
-                id:doc.id,
-                item:doc.data()
-            })))
+        get(LIST_FILES).then((response) => {
+            const keys = Object.keys(response.data);
+            const files = [];
+            keys.forEach(key => {
+                const eachFile = response.data[key].file;
+                files.push({
+                    id: eachFile.name,
+                    item: eachFile
+                })
+            });
+            setFiles(files)
+            console.log('files', files)
+        }).catch((err) => {
+            console.log(err);
+            alert(err);
         })
+        // db.collection('myFiles').onSnapshot(snapshot => {
+        //     console.log('got the files', snapshot)
+        //     setFiles(snapshot.docs.map(doc => ({
+        //         id:doc.id,
+        //         item:doc.data()
+        //     })))
+        // })
     }, [])
 
     return (
@@ -39,7 +57,7 @@ export const FilesView = () => {
             </div>
             {
                 files.map(({id, item}) => (
-                    <FileItem id={id} caption={item.caption} fileUrl={item.fileUrl} size={item.size} timestamp={item.timestamp} />
+                    <FileItem id={id} caption={item.name} size={item.size} timestamp={item.timestamp} />
                 ))
             }
         </div>
