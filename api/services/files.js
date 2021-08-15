@@ -94,13 +94,14 @@ function startDownloadForClustor(readableStream, req, res, fileSchema, start, ch
     // let clustorindex = 0;
     const progress = startDownloadingFromClustor(fileSchema.clustors, clustorIndex, start, chunksize, writableStream, onError);
     let clustorindex = progress.clustorindex;
-    const chunksize = progress.chunksize;
+    chunksize = progress.chunksize;
+    start = start + (chunksize - 1);
     writableStream.on('finish', () => {
         console.log('writing finishedf for clustor ' + clustorindex);
         clustorindex++;
         if (clustorindex < fileSchema.clustors.length && chunksize > 0) {
             // download from next clustor
-            startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, clustorindex, onError)
+            startDownloadForClustor(readableStream, req, res, fileSchema, 0, chunksize, clustorindex, onError)
         } else {
             res.end();
         }
