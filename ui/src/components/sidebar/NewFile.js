@@ -1,12 +1,12 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import AddICon from '@material-ui/icons/Add'
 import './../../styles/NewFile.css'
 
 import firebase from 'firebase'
 import { storage, db } from "../../firebase";
 import { makeStyles, Modal } from '@material-ui/core';
-import { post } from '../../services/RestService';
-import { BASE_URL, UPLOAD_FILE } from '../../constants/REST_URLS';
+import { get, post } from '../../services/RestService';
+import { BASE_URL, UPLOAD_FILE, UPLOAD_STATUS } from '../../constants/REST_URLS';
 import { uploadFile } from '../../services/FileService';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
@@ -23,13 +23,35 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         width: 400,
         backgroundColor: theme.palette.background.paper,
-        border: '2px solid #000',
+        // border: '2px solid #000',
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3)
     }
 }))
 
 export const NewFile = () => {
+
+    const [uploadStatus, setUploadStatus] = useState([])
+
+    useEffect(() => {
+        get(UPLOAD_STATUS).then((response) => {
+            const keys = Object.keys(response.data);
+            const statuses = [];
+            keys.forEach(key => {
+                const status = response.data[key];
+                statuses.push({
+                    id: key,
+                    item: status
+                })
+            });
+            setUploadStatus(statuses)
+            console.log('files', statuses)
+        }).catch((err) => {
+            console.log(err);
+            alert(err);
+        })
+    }, [])
+
     const classes = useStyles();
 
     const [modelStyle] = useState(getModalStyle);
@@ -98,7 +120,20 @@ export const NewFile = () => {
                 aria-describedby="simple-modal-description"
             >
                 <div style={modelStyle} className={classes.paper}>
-                    <p>Select file you want to upload!</p>
+
+                   <div className="newUploadTask">
+                    <input type="text" placeholder="  Enter url or magnet" className="newUploadTask__input" onChange={handleChange}/>
+                    <span className="newUploadTask__submit">
+                        <CloudUploadIcon  style={{color:'green'}}/>
+                        <text style={{marginLeft:'5px'}}>Upload</text>
+                    </span>
+                   </div>
+
+                   {/* Show upload tasks */}
+
+
+
+                    {/* <p>Select file you want to upload!</p>
 
                     {
                         uploading ? (
@@ -109,7 +144,7 @@ export const NewFile = () => {
                             <button onClick={handleUpload}>Upload</button>
                             </>
                         )
-                    }
+                    } */}
 
                 </div>
             </Modal>

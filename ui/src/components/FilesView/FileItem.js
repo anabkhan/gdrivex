@@ -16,7 +16,7 @@ const FileItem = ({id, caption, timestamp, fileUrl, size}) => {
         let i = -1;
         const byteUnits = ['kB', 'MB', 'GB', 'TB']
         do {
-            fileSizeInBytes= fileSizeInBytes / 2014;
+            fileSizeInBytes= fileSizeInBytes / 1024;
             i++;
         } while (fileSizeInBytes > 1024);
         

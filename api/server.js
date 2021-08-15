@@ -114,6 +114,10 @@ app.delete('/deleteFile', async (req,res) => {
   })
 });
 
+app.get('/getUploadStatus', async (req, res) => {
+  res.send(CommonUtil.createSuccessMessage(FileService.getUploadStatus(), 'Upload status'))
+})
+
 
 
 app.post('/uploadFile', async (req, res) => {

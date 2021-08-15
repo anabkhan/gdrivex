@@ -7,6 +7,13 @@ const { GDriveService } = require('./gdrive');
 const { getData, deleteData } = require('./fireabse');
 const { dbPaths } = require('../constants/FIREBASE_DB_PATHS');
 
+let fileUploadStatus = {
+    'delicate.mp3': {
+        size: 9398144,
+        downloaded: 5398144
+    }
+};
+
 module.exports.FileService = {
     downloadFromURL: (url, fileName,  onError) => {
         getFileInfoFromURL(url, (info) => {
@@ -25,6 +32,10 @@ module.exports.FileService = {
                     } else {
                         let offset = 0, size = 0;
                         let index = 0;
+                        fileUploadStatus[fileSchema.name] = {
+                            total: info.size,
+                            downloaded: 0
+                        };
                         schema.uploadTask.clustors.forEach(clustor => {
                             size = size + clustor.fileSize;
                             handleFileUploadForClustor(url, clustor, offset, size, info)
@@ -61,9 +72,7 @@ module.exports.FileService = {
             });
 
             const readableStream = new Stream.Readable({
-                read() {
-                    console.log('reading data')
-                }
+                read() {}
             })
 
             readableStream.pipe(res);
@@ -100,6 +109,10 @@ module.exports.FileService = {
             // delete schema from DB
             deleteData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(fileName)))
         }, onError);
+    },
+
+    getUploadStatus: () => {
+        return fileUploadStatus;
     }
 }
 
@@ -255,9 +268,11 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                 encoding: null
             }).pipe(fileDataStream)
 
-            // fileDataStream.on('data', (data) => {
-            //     console.log(data)
-            // })
+            fileDataStream.on('data', (data) => {
+                // console.log(data)
+                // update status
+                fileUploadStatus[fileSchema.name].downloaded = fileUploadStatus[fileSchema.name].downloaded + data.length
+            })
 
             clustor.started = true;
             GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
