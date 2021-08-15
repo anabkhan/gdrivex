@@ -3,7 +3,8 @@ import React from 'react'
 import '../../styles/FileItem.css'
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { BASE_URL, DOWNLOAD_FILE } from '../../constants/REST_URLS';
+import { BASE_URL, DELETE_FILE, DOWNLOAD_FILE } from '../../constants/REST_URLS';
+import { _delete } from '../../services/RestService';
 
 // const monthNames = 
 
@@ -28,6 +29,15 @@ const FileItem = ({id, caption, timestamp, fileUrl, size}) => {
     //     });
     // }
 
+    const deleteFile = () => {
+        _delete(`${DELETE_FILE}?name=${caption}`).then((response) => {
+            alert('File deletion started')
+        }).catch((err) => {
+            console.log('File deletion failed', err)
+            alert('File deletion faild')
+        })
+    }
+
     return (
         <div className='fileItem'>
             <a href={fileUrl} target='_blank' download>
@@ -43,7 +53,9 @@ const FileItem = ({id, caption, timestamp, fileUrl, size}) => {
                         <a href={`${BASE_URL}${DOWNLOAD_FILE}?name=${caption}`} download={caption} style={{marginRight:'10px'}}>
                             <DownloadIcon style={{color:'rgb(51, 103, 214)'}}/>
                         </a>
-                        <DeleteIcon style={{color:'red', cursor:'pointer'}}/>
+                        <span onClick={deleteFile}>
+                            <DeleteIcon style={{color:'red', cursor:'pointer'}}/>
+                        </span>
                     </div>
                 </div>
             </a>

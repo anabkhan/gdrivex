@@ -106,7 +106,7 @@ app.get('/listFiles', async (req,res) => {
   })
 });
 
-app.get('/deleteFile', async (req,res) => {
+app.delete('/deleteFile', async (req,res) => {
   FileService.deleteFile(req.query.name, (response) => {
     res.send(CommonUtil.createSuccessMessage(response, 'File deleted'))
   }, (err) => {

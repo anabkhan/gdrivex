@@ -4,6 +4,13 @@ export const get = (url) => {
     return fetch(BASE_URL + url).then((response) => response.json());
 }
 
+export const _delete = (url) => {
+    return fetch(BASE_URL + url, {
+        method: 'delete'
+    })
+    .then((response) => response.json());
+}
+
 export const post = (url, body) => {
     return fetch(BASE_URL + url, {
         method: 'post',
