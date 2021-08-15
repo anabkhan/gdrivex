@@ -33,5 +33,5 @@ module.exports.getData = (path, onData, onError) => {
 }
 
 module.exports.deleteData = (path) => {
-    db.ref(path).removed()
+    db.ref(path).remove()
 }

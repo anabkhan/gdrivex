@@ -86,10 +86,11 @@ app.post('/getSchema', async (req, res) => {
 });
 
 app.post('/createUploadTask', async (req, res) => {
-  FileService.downloadFromURL(req.query.url, req.query.fileName, (error) => {
-    res.status(400).send(CommonUtil.createFailureMessage(error))
+  FileService.downloadFromURL(req.body.url, req.body.fileName, (error) => {
+    // res.status(400).send(CommonUtil.createFailureMessage(error))
+    console.log('Failure in create uplaod task', error)
   })
-  res.send()
+  res.send(CommonUtil.createSuccessMessage({},"File upload started"))
 })
 
 app.get('/downloadFile', async (req, res) => {
@@ -106,8 +107,8 @@ app.get('/listFiles', async (req,res) => {
   })
 });
 
-app.delete('/deleteFile', async (req,res) => {
-  FileService.deleteFile(req.query.name, (response) => {
+app.post('/deleteFile', async (req,res) => {
+  FileService.deleteFile(req.body.name, (response) => {
     res.send(CommonUtil.createSuccessMessage(response, 'File deleted'))
   }, (err) => {
     res.status(400).send(CommonUtil.createFailureMessage(err))

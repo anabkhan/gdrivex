@@ -9,7 +9,7 @@ import { LIST_FILES } from '../../constants/REST_URLS';
 export const FilesView = () => {
     const [files, setFiles] = useState([])
 
-    useEffect(() => {
+    const fetchFiles = () => {
         get(LIST_FILES).then((response) => {
             const keys = Object.keys(response.data);
             const files = [];
@@ -26,6 +26,10 @@ export const FilesView = () => {
             console.log(err);
             alert(err);
         })
+    }
+
+    useEffect(() => {
+        fetchFiles();
     }, [])
 
     return (
@@ -51,7 +55,7 @@ export const FilesView = () => {
             </div> */}
             {
                 files.map(({id, item}) => (
-                    <FileItem id={id} caption={item.name} size={item.size} timestamp={item.timestamp} />
+                    <FileItem id={id} caption={item.name} size={item.size} timestamp={item.timestamp} onDeleted={fetchFiles} />
                 ))
             }
         </div>

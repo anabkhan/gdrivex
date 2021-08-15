@@ -4,9 +4,10 @@ export const get = (url) => {
     return fetch(BASE_URL + url).then((response) => response.json());
 }
 
-export const _delete = (url) => {
+export const _delete = (url, body) => {
     return fetch(BASE_URL + url, {
-        method: 'delete'
+        method: 'delete',
+        body: JSON.stringify(body)
     })
     .then((response) => response.json());
 }

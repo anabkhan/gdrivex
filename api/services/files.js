@@ -32,7 +32,7 @@ module.exports.FileService = {
                     } else {
                         let offset = 0, size = 0;
                         let index = 0;
-                        fileUploadStatus[fileSchema.name] = {
+                        fileUploadStatus[schema.file.name] = {
                             total: info.size,
                             downloaded: 0
                         };
@@ -86,7 +86,7 @@ module.exports.FileService = {
     },
 
     deleteFile: (name, onSuccess, onError) => {
-        getFileSchemaFromName({name}, (schema) => {
+        getFileSchemaFromName(name, (schema) => {
             // delete file from clusor drive
             schema.clustors.forEach(clustor => {
                 GDriveXService.getDriveObject(clustor.drive, (drive) => {
@@ -107,7 +107,8 @@ module.exports.FileService = {
             onSuccess("File deletion started")
 
             // delete schema from DB
-            deleteData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(fileName)))
+            deleteData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(name)));
+            deleteData(dbPaths.uploadTask(CommonUtil.generateKeyForFileName(name)))
         }, onError);
     },
 
@@ -196,14 +197,11 @@ function getFileInfoFromURL(url, onData, onError) {
             r.abort();
             let name;
             if (disposition && disposition.includes('filename=')) {
-                fileName = disposition.split('filename=')[1].split('"')[0];
+                name = disposition.split('filename=')[1].split('"')[0];
             } else {
-                const indexOfQ = url.indexOf("?");
-                if (indexOfQ && indexOfQ > 0) {
-                    url.substr(url.lastIndexOf("/")+1, indexOfQ);
-                } else {
-                    url.substr(url.lastIndexOf("/")+1, indexOfQ);
-                }
+                let indexOfQ = url.indexOf("?");
+                indexOfQ = indexOfQ && (indexOfQ > 0) ? indexOfQ : url.length - 1;
+                name = url.substr(url.lastIndexOf("/")+1, indexOfQ);
             }
             onData({
                 size,name
@@ -213,6 +211,8 @@ function getFileInfoFromURL(url, onData, onError) {
 }
 
 function handleFileUploadForClustor(url, clustor, offset, size, file) {
+
+    console.log('starting uplaod of clustor',clustor)
 
     const fileNameKey = CommonUtil.generateKeyForFileName(file.name);
 
@@ -266,12 +266,16 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                 uri: url,
                 method: 'GET',
                 encoding: null
-            }).pipe(fileDataStream)
+            }).pipe(fileDataStream).on('error', (error) => {
+                console.log('Error while downloading file from url',error)
+                // clustor.completed = true;
+                // GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
+            })
 
             fileDataStream.on('data', (data) => {
                 // console.log(data)
                 // update status
-                fileUploadStatus[fileSchema.name].downloaded = fileUploadStatus[fileSchema.name].downloaded + data.length
+                fileUploadStatus[file.name].downloaded = fileUploadStatus[file.name].downloaded + data.length
             })
 
             clustor.started = true;
@@ -285,6 +289,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                     if (response && response.id) {
                         // File successfully uploaded
                         // Update the uploadTask
+                        console.log('Clustor upload finished',response);
                         clustor.completed = true;
                         GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
                         console.log(response)

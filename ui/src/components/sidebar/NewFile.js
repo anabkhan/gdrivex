@@ -9,6 +9,7 @@ import { get, post } from '../../services/RestService';
 import { BASE_URL, UPLOAD_FILE, UPLOAD_STATUS } from '../../constants/REST_URLS';
 import { uploadFile } from '../../services/FileService';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import { Uploads } from '../Uploads';
 
 function getModalStyle() {
     return {
@@ -121,13 +122,15 @@ export const NewFile = () => {
             >
                 <div style={modelStyle} className={classes.paper}>
 
-                   <div className="newUploadTask">
+                    <Uploads open={open}/>
+
+                   {/* <div className="newUploadTask">
                     <input type="text" placeholder="  Enter url or magnet" className="newUploadTask__input" onChange={handleChange}/>
                     <span className="newUploadTask__submit">
                         <CloudUploadIcon  style={{color:'green'}}/>
                         <text style={{marginLeft:'5px'}}>Upload</text>
                     </span>
-                   </div>
+                   </div> */}
 
                    {/* Show upload tasks */}
 

@@ -1,0 +1,40 @@
+.newUploadTask {
+    display: flex;
+    align-items: center;    
+}
+.newUploadTask__submit {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    padding: 5px 17px 5px 17px;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
+    cursor: pointer;
+}
+
+.newUploadTask__input {
+    width: 45%;
+    height: 25px;
+    border-radius: 6px;
+    margin-right: 20px;
+}
+
+.upload__tasks {
+    margin-top: 30px;
+    margin-top: 30px;
+    max-height: 250px;
+    overflow: auto;
+}
+
+.uploads__single__task {
+    display: flex;
+    height: 25px;
+}
+
+.uploads__task__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 1.2em;
+    white-space: nowrap;
+    flex: 1;
+}
