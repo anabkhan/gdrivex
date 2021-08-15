@@ -7,3 +7,11 @@
 .hr {
     background-color: rgb(197, 197, 197);
 }
+.sideBar__itemsContainer {
+    /* padding-left: 15px; */
+}
+
+.sideBar__itemsContainer > .sideBarItem {
+    cursor: pointer;
+    padding-left: 15px;
+}

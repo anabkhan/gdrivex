@@ -2,6 +2,7 @@
     display: flex;
     padding: 10px 0;
     border-radius: 0 100px 100px 0;
+    align-items: center;
 }
 
 .sideBarItem:hover {
@@ -15,6 +16,7 @@
 
 .sideBarItem__main {
     display: flex;
+    align-items: center;
 }
 
 .sideBarItem__main>p {

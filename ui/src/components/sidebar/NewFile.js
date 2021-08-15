@@ -8,6 +8,7 @@ import { makeStyles, Modal } from '@material-ui/core';
 import { post } from '../../services/RestService';
 import { BASE_URL, UPLOAD_FILE } from '../../constants/REST_URLS';
 import { uploadFile } from '../../services/FileService';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
 function getModalStyle() {
     return {
@@ -86,8 +87,8 @@ export const NewFile = () => {
     return (
         <div className='newFile'>
             <div className='newFile__container' onClick={handleOpen}>
-                <AddICon />
-                <p>New</p>
+                <CloudUploadIcon  style={{color:'green'}}/>
+                <p>Uploads</p>
             </div>
 
             <Modal

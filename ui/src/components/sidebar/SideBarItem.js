@@ -5,9 +5,9 @@ import './../../styles/sidebaritem.css'
 export const SideBarItem = ({arrow, icon, label}) => {
     return (
         <div className='sideBarItem'>
-            <div className='sideBarItem__arrow'>
+            {/* <div className='sideBarItem__arrow'>
                 {arrow && (<ArrowRight />)}
-            </div>
+            </div> */}
 
             <div className='sideBarItem__main'>
                 {icon}
