@@ -92,11 +92,13 @@ function startDownloadForClustor(readableStream, req, res, fileSchema, start, ch
 
 
     // let clustorindex = 0;
-    let clustorindex = startDownloadingFromClustor(fileSchema.clustors, clustorIndex, start, chunksize, writableStream, onError)
+    const progress = startDownloadingFromClustor(fileSchema.clustors, clustorIndex, start, chunksize, writableStream, onError);
+    let clustorindex = progress.clustorindex;
+    const chunksize = progress.chunksize;
     writableStream.on('finish', () => {
         console.log('writing finishedf for clustor ' + clustorindex);
         clustorindex++;
-        if (clustorindex < fileSchema.clustors.length) {
+        if (clustorindex < fileSchema.clustors.length && chunksize > 0) {
             // download from next clustor
             startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, clustorindex, onError)
         } else {
@@ -110,9 +112,18 @@ function startDownloadingFromClustor(clustors, clustorindex, offset, chunksize, 
     if (clustor.completed) {
         const fileId = clustor.fileID;
         if (offset < (clustor.fileSize - 1)) {
+            // let chunkSizeToDownload = chunksize > clustor.fileSize ? clustor.fileSize : chunksize;
+            let end = (chunksize - 1) + offset;
+            // end = end > (clustor.fileSize - 1) ? (clustor.fileSize - 1) : end;
+            if (end > (clustor.fileSize - 1)) {
+                chunksize = end - (clustor.fileSize - 1);
+                end = (clustor.fileSize - 1);
+            } else {
+                chunksize = 0;
+            }
             GDriveXService.getDriveObject(clustor.drive, (drive) => {
                 drive.files.get(
-                    { fileId: fileId, alt: 'media', headers: { "Range": `bytes=${offset}-${(chunksize - 1) + offset}` } },
+                    { fileId: fileId, alt: 'media', headers: { "Range": `bytes=${offset}-${end}` } },
                     { responseType: 'stream', },
                     (err, result) => {
                         if (err) {
@@ -121,9 +132,9 @@ function startDownloadingFromClustor(clustors, clustorindex, offset, chunksize, 
                             result.data.pipe(writableStream)
                         }
                     }
-                );
-            })
-            return clustorindex;
+                    );
+                });
+                return {clustorindex,chunksize};
             } else {
             offset = offset - clustor.fileSize;
             return startDownloadingFromClustor(clustors, clustorindex + 1, offset, chunksize, writableStream, onError)
