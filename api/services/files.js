@@ -200,8 +200,11 @@ function getFileInfoFromURL(url, onData, onError) {
                 name = disposition.split('filename=')[1].split('"')[0];
             } else {
                 let indexOfQ = url.indexOf("?");
-                indexOfQ = indexOfQ && (indexOfQ > 0) ? indexOfQ : url.length - 1;
-                name = url.substr(url.lastIndexOf("/")+1, indexOfQ);
+                // indexOfQ = indexOfQ && (indexOfQ > 0) ? indexOfQ : url.length - 1;
+                if (indexOfQ && indexOfQ > 0) {
+                    url = url.split('?')[0]
+                }
+                name = url.substr(url.lastIndexOf("/")+1, url.length - 1);
             }
             onData({
                 size,name
@@ -295,6 +298,9 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                         console.log(response)
                         clustor.fileID = response.id;
                         GDriveXService.updateClustorOfSchema(fileNameKey, clustor)
+                        if (fileUploadStatus[file.name].downloaded >= fileUploadStatus[file.name].size) {
+                            delete fileUploadStatus[file.name];
+                        }
                     }
                 } catch (error) {
                     console.log(error)
