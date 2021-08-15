@@ -25,3 +25,7 @@
 .fileItem--left {
     flex: 1;
 }
+
+.fileItem--right>p{
+    font-size: large;
+}

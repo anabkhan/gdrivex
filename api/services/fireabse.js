@@ -31,3 +31,7 @@ module.exports.getData = (path, onData, onError) => {
         onData(error)
     });
 }
+
+module.exports.deleteData = (path) => {
+    db.ref(path).removed()
+}

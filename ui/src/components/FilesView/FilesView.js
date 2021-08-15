@@ -26,13 +26,6 @@ export const FilesView = () => {
             console.log(err);
             alert(err);
         })
-        // db.collection('myFiles').onSnapshot(snapshot => {
-        //     console.log('got the files', snapshot)
-        //     setFiles(snapshot.docs.map(doc => ({
-        //         id:doc.id,
-        //         item:doc.data()
-        //     })))
-        // })
     }, [])
 
     return (
@@ -45,16 +38,17 @@ export const FilesView = () => {
                 }
             </div> */}
 
-            <div className='filesView__titles'>
+            {/* <div className='filesView__titles'>
                 <div className='filesView__titles--left'>
                     <p>Name</p>
                 </div>
 
                 <div className='filesView__titles--right'>
-                    {/* <p>Last Modified</p> */}
                     <p>File size</p>
+
+                    <p>Action</p>
                 </div>
-            </div>
+            </div> */}
             {
                 files.map(({id, item}) => (
                     <FileItem id={id} caption={item.name} size={item.size} timestamp={item.timestamp} />

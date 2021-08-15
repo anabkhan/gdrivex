@@ -85,7 +85,7 @@ export const DrivesView = () => {
                 <p style={{fontWeight:'500', fontSize:'x-large'}}>Drives</p>
                 <span onClick={openAddDriveModal} style={{marginLeft:'50px', color:'rgb(51, 103, 214)', fontWeight:'bold', display:'flex', cursor:'pointer'}}>
                     <Add style={{color:'rgb(51, 103, 214)'}}/>
-                    Add New Drive</span>
+                    Add</span>
             </div>
 
             {

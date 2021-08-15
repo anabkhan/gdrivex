@@ -4,7 +4,7 @@ const { CommonUtil } = require('./commonutil');
 const { GDriveXService } = require('./gdrivex');
 const { Stream } = require('stream');
 const { GDriveService } = require('./gdrive');
-const { getData } = require('./fireabse');
+const { getData, deleteData } = require('./fireabse');
 const { dbPaths } = require('../constants/FIREBASE_DB_PATHS');
 
 module.exports.FileService = {
@@ -74,6 +74,32 @@ module.exports.FileService = {
 
     listFiles: (start, size, onSuccess, onError) => {
         getData(dbPaths.files(), onSuccess, onError)
+    },
+
+    deleteFile: (name, onSuccess, onError) => {
+        getFileSchemaFromName({name}, (schema) => {
+            // delete file from clusor drive
+            schema.clustors.forEach(clustor => {
+                GDriveXService.getDriveObject(clustor.drive, (drive) => {
+                    drive.files.delete({
+                        fileId: clustor.fileID,
+                      }, (err, res) => {
+                          if (err) {
+                            //   onError(err)
+                            console.log('File clustor deletion failed',err)
+                          } else {
+                            //   onSuccess(res)
+                            console.log('File clustor deleted')
+                          }
+                      })
+                });
+            });
+
+            onSuccess("File deletion started")
+
+            // delete schema from DB
+            deleteData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(fileName)))
+        }, onError);
     }
 }
 

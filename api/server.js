@@ -104,7 +104,15 @@ app.get('/listFiles', async (req,res) => {
   }, (err) => {
     res.status(400).send(CommonUtil.createFailureMessage(err))
   })
-})
+});
+
+app.get('/deleteFile', async (req,res) => {
+  FileService.deleteFile(req.query.name, (response) => {
+    res.send(CommonUtil.createSuccessMessage(response, 'File deleted'))
+  }, (err) => {
+    res.status(400).send(CommonUtil.createFailureMessage(err))
+  })
+});
 
 
 
