@@ -10,6 +10,7 @@ const { CommonUtil } = require('./services/commonutil');
 const { GDriveXService } = require('./services/gdrivex');
 const { Readable, Stream } = require('stream');
 const { FileService } = require('./services/files');
+const path = require('path');
 app.use(express.json());
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
@@ -23,8 +24,11 @@ app.listen(port, () => {
   console.log("GDriveX backend started on " + port);
 });
 
+app.use(express.static(path.join(__dirname, 'ui')));
+
 app.get('/', async (req, res) => {
-  res.send('Hello World')
+  // res.send('Hello World')
+  res.sendFile(path.join(__dirname, 'ui', 'index.html'));
 });
 
 var oAuth2Client = null;
@@ -224,4 +228,4 @@ function listFiles(auth) {
   });
 }
 
-module.exports = app
+module.exports = app;
