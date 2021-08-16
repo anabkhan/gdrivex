@@ -53,7 +53,7 @@ const FileItem = ({id, caption, size, onDeleted}) => {
                     {/* <p>{timestamp}</p> */}
                     <p>{getReadableFileSizeString(size)}</p>
                     <div>
-                        <a href={`${BASE_URL}${DOWNLOAD_FILE}?name=${caption}`} target='_blank' download style={{marginRight:'10px'}}>
+                        <a href={`${BASE_URL}${DOWNLOAD_FILE}/${caption}`} target='_blank' download style={{marginRight:'10px'}}>
                             <DownloadIcon style={{color:'rgb(51, 103, 214)'}}/>
                         </a>
                         <span onClick={deleteFile}>

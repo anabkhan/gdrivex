@@ -25,9 +25,10 @@ module.exports.getData = (path, onData, onError) => {
         if (snapshot.exists()) {
             onData(snapshot.val());
         } else {
-            onError({code: Messages.DATA_DOESNT_EXISTS, message: 'Data doesnt exists'})
+            onError({ code: Messages.DATA_DOESNT_EXISTS, message: 'Data doesnt exists' })
         }
     }).catch((error) => {
+        console.log(error)
         onData(error)
     });
 }

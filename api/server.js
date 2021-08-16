@@ -10,6 +10,7 @@ const { CommonUtil } = require('./services/commonutil');
 const { GDriveXService } = require('./services/gdrivex');
 const { Readable, Stream } = require('stream');
 const { FileService } = require('./services/files');
+const path = require('path');
 app.use(express.json());
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
@@ -19,12 +20,28 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
 
 
+// var access = fs.createWriteStream('node.access.log', { flags: 'a' })
+//       , error = fs.createWriteStream('node.error.log', { flags: 'a' });
+
+// redirect stdout / stderr
+// proc.stdout.pipe(access);
+// proc.stderr.pipe(error);
+
+
 app.listen(port, () => {
   console.log("GDriveX backend started on " + port);
 });
 
+app.use(express.static(path.join(__dirname, 'views')));
+
 app.get('/', async (req, res) => {
-  res.send('Hello World')
+  // res.send('Hello World')
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+app.get('/errorlogs', async (req, res) => {
+  // res.send(path.join(__dirname, 'node.error.log'))
+  res.sendFile(path.join(__dirname, 'node.error.log'));
 });
 
 var oAuth2Client = null;
@@ -93,8 +110,9 @@ app.post('/createUploadTask', async (req, res) => {
   res.send(CommonUtil.createSuccessMessage({},"File upload started"))
 })
 
-app.get('/downloadFile', async (req, res) => {
-  FileService.downloadFile(req.query.name, req, res, (error) => {
+app.route('/downloadFile/:name').get(async (req, res) => {
+  // res.send('download api' + req.params.name)
+  FileService.downloadFile(req.params.name, req, res, (error) => {
     res.status(400).send(CommonUtil.createFailureMessage(error))
   })
 })
@@ -224,4 +242,4 @@ function listFiles(auth) {
   });
 }
 
-module.exports = app
+module.exports = app;

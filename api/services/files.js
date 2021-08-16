@@ -55,27 +55,31 @@ module.exports.FileService = {
     downloadFile: (fileName, req, res, onError) => {
         getFileSchemaFromName(fileName, (fileSchema) => {
 
+            
             const range = req.headers.range;
             const total = fileSchema.file.size;
-
+            
             var positions = (range? range : 'bytes=0-').replace(/bytes=/, "").split("-");
             var start = parseInt(positions[0], 10);
             var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
             var chunksize = (end - start) + 1;
-
+            
+            // res.send('done2')
+            
             res.writeHead(range ? 206 : 200, {
                 "Content-Range": "bytes " + start + "-" + end + "/" + total,
                 "Accept-Ranges": "bytes",
                 "Content-Length": chunksize,
-                "Content-Type": "video/" + fileName.split('.').pop(),
-                "Content-Disposition": "attachment; filename="+fileName,
+                // "Content-Type": "video/" + fileName.split('.').pop(),
+                "Content-Disposition": "attachment; filename="+fileName
             });
-
+            
             const readableStream = new Stream.Readable({
                 read() {}
             })
 
             readableStream.pipe(res);
+            // res.send('download started')
 
             startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, 0, onError);
         }, onError)
@@ -118,7 +122,9 @@ module.exports.FileService = {
 }
 
 function getFileSchemaFromName(fileName, onFileSchema, onError) {
-    getData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(fileName)), onFileSchema, onError);
+    getData(dbPaths.fileSchema(CommonUtil.generateKeyForFileName(fileName)), (schema) => {
+        onFileSchema(schema)
+    }, onError);
 }
 
 function startDownloadForClustor(readableStream, req, res, fileSchema, start, chunksize, clustorIndex, onError) {

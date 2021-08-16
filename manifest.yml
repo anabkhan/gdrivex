@@ -1,0 +1,5 @@
+---
+applications:
+ - name: gdrivex
+   random-route: true
+   memory: 192M
