@@ -12,14 +12,18 @@ jobs:
       working-directory: ./api
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: ./api
-      - name: Build react module
-        run: ls && pwd
-      - name: Deploy to IBM Cloud Foundry
-        uses: IBM/cloudfoundry-deploy@master
-        with:
-          IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
-          IBM_CLOUD_CF_API: ${{ secrets.IBM_CLOUD_CF_API }}
-          IBM_CLOUD_CF_ORG: ${{ secrets.IBM_CLOUD_CF_ORG }}
-          IBM_CLOUD_CF_SPACE: ${{ secrets.IBM_CLOUD_CF_SPACE }}
+      - name: Install IBM Cloud CLI
+        run: curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+        shell: bash
+      - name: Install Cloud Foundry CLI
+        run: ibmcloud cf install
+        shell: bash
+      - name: Authenticate with IBM Cloud CLI
+        run: ibmcloud login --apikey "${{ secrets.IBM_CLOUD_API_KEY }}" --no-region $( [[ ! -z "${{ secrets.RESOURCE_GROUP }}" ]] && echo "-g ${{ secrets.RESOURCE_GROUP }}")
+        shell: bash
+      - name: Target a Cloud Foundry org and space
+        run: ibmcloud target --cf-api "${{ secrets.IBM_CLOUD_CF_API }}" -o "${{ secrets.IBM_CLOUD_CF_ORG }}" -s "${{ secrets.IBM_CLOUD_CF_SPACE }}"
+        shell: bash
+      - name: Deploy to Cloud Foundry
+        run: cd ./api && ibmcloud cf push -f manifest.yml
+        shell: bash
