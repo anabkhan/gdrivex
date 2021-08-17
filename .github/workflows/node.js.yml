@@ -2,9 +2,6 @@ name: Deploy to IBM Cloud Foundry
 on:
   push:
     branches: [ main ]
-defaults:
-  run:
-    working-directory: ./api
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,5 +22,5 @@ jobs:
         run: ibmcloud target --cf-api "${{ secrets.IBM_CLOUD_CF_API }}" -o "${{ secrets.IBM_CLOUD_CF_ORG }}" -s "${{ secrets.IBM_CLOUD_CF_SPACE }}"
         shell: bash
       - name: Deploy to Cloud Foundry
-        run: cd ./api && ibmcloud cf push -f manifest.yml
+        run: pwd && ls && cd ./api && ibmcloud cf push -f manifest.yml
         shell: bash
