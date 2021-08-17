@@ -11,7 +11,7 @@ jobs:
         run: npm install --prefix ./ui && CI=false npm run build --prefix ./ui
       - name: Copying build files to views
         run: rm -rf ./api/views || true |
-          ls ./ui/build && cp ./ui/build ./api/views
+          ls ./ui/build && cp -r ./ui/build ./api/views
       - name: Install IBM Cloud CLI
         run: curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
         shell: bash
