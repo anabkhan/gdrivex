@@ -5,8 +5,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      working-directory: ./api
     steps:
       - uses: actions/checkout@v2
       - name: Building react module
