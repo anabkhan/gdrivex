@@ -12,6 +12,8 @@ jobs:
       working-directory: ./api
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: ./api
       - name: Build react module
         run: ls && pwd
       - name: Deploy to IBM Cloud Foundry
@@ -21,4 +23,3 @@ jobs:
           IBM_CLOUD_CF_API: ${{ secrets.IBM_CLOUD_CF_API }}
           IBM_CLOUD_CF_ORG: ${{ secrets.IBM_CLOUD_CF_ORG }}
           IBM_CLOUD_CF_SPACE: ${{ secrets.IBM_CLOUD_CF_SPACE }}
-          APP_MANIFEST_FILE: ./api/manifest.yml
