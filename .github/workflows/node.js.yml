@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Building react module
-        run: npm run build --prefix ./ui
+        run: npm install --prefix ./ui && npm run build --prefix ./ui
       - name: Copying build files to views
         run: rm -rf ./api/views || true |
           cp ./ui/build ./api/views
