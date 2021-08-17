@@ -33,7 +33,7 @@ export const Uploads = (open) => {
 
         var task = setInterval(() => {
             fetchUpdateTasks();
-        }, 3000);
+        }, 1000);
 
         window.addEventListener('mousemove', () => {});
 
