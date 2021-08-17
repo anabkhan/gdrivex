@@ -12,6 +12,8 @@ jobs:
       working-directory: ./api
     steps:
       - uses: actions/checkout@v2
+      - name: Build react module
+        run: cd ./api
       - name: Deploy to IBM Cloud Foundry
         uses: IBM/cloudfoundry-deploy@master
         with:
