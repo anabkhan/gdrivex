@@ -9,6 +9,11 @@ jobs:
       working-directory: ./api
     steps:
       - uses: actions/checkout@v2
+      - name: Building react module
+        run: npm run build --prefix ./ui
+      - name: Copying build files to views
+        run: rm -rf ./api/views || true |
+          cp ./ui/build ./api/views
       - name: Install IBM Cloud CLI
         run: curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
         shell: bash
