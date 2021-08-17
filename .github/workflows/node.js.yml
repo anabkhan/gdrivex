@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build react module
-        run: cd ./api
+        run: ls && pwd
       - name: Deploy to IBM Cloud Foundry
         uses: IBM/cloudfoundry-deploy@master
         with:
