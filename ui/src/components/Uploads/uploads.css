@@ -34,7 +34,21 @@
 .uploads__task__name {
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 1.2em;
+    /* height: 1.2em; */
     white-space: nowrap;
     flex: 1;
+}
+
+.torrent_file_selection {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.torrent_file_selection_actions {
+    display: flex;   
+}
+
+.torrent_file_selection_actions>.action {
+    cursor: pointer;
 }

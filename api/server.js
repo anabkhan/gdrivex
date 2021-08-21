@@ -107,8 +107,11 @@ app.post('/createUploadTask', async (req, res) => {
   FileService.downloadFromURL(req.body.url, req.body.fileName, (error) => {
     // res.status(400).send(CommonUtil.createFailureMessage(error))
     console.log('Failure in create uplaod task', error)
+  }, (onSuccess) => {
+    res.send(CommonUtil.createSuccessMessage({},"File upload started"))
+    return;
   })
-  res.send(CommonUtil.createSuccessMessage({},"File upload started"))
+  // res.send(CommonUtil.createSuccessMessage({},"File upload started"))
 })
 
 app.route('/downloadFile/:name').get(async (req, res) => {
@@ -146,25 +149,35 @@ app.get('/listFilesFromMagnet', async (req, res) => {
   })
 })
 
+app.post('/createUploadTaskFromMagnet' , async (req,res) => {
+  let responseNotSent = true;
+  const files = req.body.files;
+  files.forEach(file => {
+    FileService.downloadFromURL(req.body.magnet, file, (error) => {
+      console.log('Failure in create uplaod task', error)
+      if (responseNotSent) {
+        responseNotSent = false;
+        res.status(400).send(CommonUtil.createFailureMessage(error))
+      }
+      return;
+    }, (success) => {
+      if (responseNotSent) {
+        responseNotSent = false;
+        res.send(CommonUtil.createSuccessMessage({},"File upload started"))
+      }
+      return;
+    })
+  });
+})
+
 
 
 app.post('/uploadFile', async (req, res) => {
-  // var readStream = new Readable({
-  //   read() {
-  //     console.log("read requested")
-  //   }
-  // });
   var readStream = new Stream.Readable({
     read() {
       return null;
     }
   })
-  // req.on('data', (chunk) => {
-  //   readStream.push(chunk)
-  // })
-  // req.on('end', () => {
-  //   readStream.push
-  // })
   GDriveXService.uploadFile(req, (response) => {
     res.send(CommonUtil.createSuccessMessage(response, ""))
   }, (error) => {
