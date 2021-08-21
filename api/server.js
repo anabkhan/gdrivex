@@ -152,6 +152,7 @@ app.get('/listFilesFromMagnet', async (req, res) => {
 app.post('/createUploadTaskFromMagnet' , async (req,res) => {
   let responseNotSent = true;
   const files = req.body.files;
+  console.log('starting upload for files', files)
   files.forEach(file => {
     FileService.downloadFromURL(req.body.magnet, file, (error) => {
       console.log('Failure in create uplaod task', error)
