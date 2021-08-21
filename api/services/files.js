@@ -6,19 +6,25 @@ const { Stream } = require('stream');
 const { GDriveService } = require('./gdrive');
 const { getData, deleteData } = require('./fireabse');
 const { dbPaths } = require('../constants/FIREBASE_DB_PATHS');
+const { CltsService } = require('./clts/clts');
 
 let fileUploadStatus = {
     'delicate.mp3': {
         size: 9398144,
-        downloaded: 5398144
+        downloaded: 5398144,
+        failed: false
     }
 };
 
 module.exports.FileService = {
-    downloadFromURL: (url, fileName,  onError) => {
+    downloadFromURL: (url, file,  onError, onSuccess) => {
         getFileInfoFromURL(url, (info) => {
-            if (fileName) {
-                info.name = fileName;
+            if (url.startsWith('magnet')) {
+                info = file
+            } else {
+                if (file) {
+                    info.name = file;
+                }
             }
             GDriveXService.getOrGenerateSchema(info, (schema) => {
                 if (schema.uploadTask.done) {
@@ -42,6 +48,7 @@ module.exports.FileService = {
                             offset = offset + clustor.fileSize;
                             index++;
                         });
+                        onSuccess('Download started')
                     }
                 }
             }, onError);
@@ -107,7 +114,7 @@ module.exports.FileService = {
                               }
                           })
                     });
-                });
+                }, onError);
             }
 
             onSuccess("File deletion started")
@@ -186,7 +193,7 @@ function startDownloadingFromClustor(clustors, clustorindex, offset, chunksize, 
                         }
                     }
                     );
-                });
+                }, onError);
                 return {clustorindex,chunksize};
             } else {
             offset = offset - clustor.fileSize;
@@ -198,7 +205,10 @@ function startDownloadingFromClustor(clustors, clustorindex, offset, chunksize, 
 }
 
 function getFileInfoFromURL(url, onData, onError) {
-    const r = request(url);
+    if (url.startsWith('magnet')) {
+        onData({})
+    } else {
+        const r = request(url);
         r.on('response', response => {
             const size = response.headers['content-length'];
             const disposition = response.headers['Content-Disposition'];
@@ -219,6 +229,7 @@ function getFileInfoFromURL(url, onData, onError) {
             })
         });
         r.on('error', error=>onError(error))
+    }
 }
 
 function handleFileUploadForClustor(url, clustor, offset, size, file) {
@@ -241,6 +252,8 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
         // What to do with this error?
         // Update the updaoad task clustor status as failed?
         console.error(error)
+        fileUploadStatus[file.name].failed = true;
+        fileUploadStatus[file.name].failReason = error;
     }, (resumableUri) => {
         // Update uploadTask clustor with resumable URI
         clustor.resumableUri = resumableUri;
@@ -269,19 +282,23 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
             }
 
             const fileDataStream = new Stream.PassThrough();
-            request({
-                headers: {
-                    // 'Content-Length': size,
-                    Range: `bytes=${offset + nextOffset}-${size-1}`
-                },
-                uri: url,
-                method: 'GET',
-                encoding: null
-            }).pipe(fileDataStream).on('error', (error) => {
-                console.log('Error while downloading file from url',error)
-                // clustor.completed = true;
-                // GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
-            })
+
+            const start = offset + nextOffset, end = size - 1;
+            if (url.startsWith('magnet')) {
+                CltsService.streamTorrent(url, file, start , end, fileDataStream)
+            } else {
+                request({
+                    headers: {
+                        // 'Content-Length': size,
+                        Range: `bytes=${start}-${end}`
+                    },
+                    uri: url,
+                    method: 'GET',
+                    encoding: null
+                }).pipe(fileDataStream).on('error', (error) => {
+                    console.log('Error while downloading file from url',error)
+                })
+            }
 
             fileDataStream.on('data', (data) => {
                 // console.log(data)
@@ -294,6 +311,8 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
 
             GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
+                fileUploadStatus[file.name].failed = true;
+                fileUploadStatus[file.name].failReason = error;
             }, (response) => {
                 try {
                     response = JSON.parse(response);

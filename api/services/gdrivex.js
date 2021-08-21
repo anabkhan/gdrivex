@@ -49,32 +49,50 @@ module.exports.GDriveXService = {
     listDrivesAsArray: (onDriveArray, onError) => {
         getData(dbPaths.drives(), (response) => {
             const keys = Object.keys(response);
+
             const drives = [];
             keys.forEach(key => {
-                const eachDrive = response[key];
-                const availableSizeEachDrive = eachDrive.storageQuota.limit - eachDrive.storageQuota.usage;
-                const driveToPush = {
-                    email: eachDrive.user.emailAddress,
-                    availableSpace: availableSizeEachDrive,
-                    ...eachDrive.storageQuota
-                }
-                if (drives.length === 0) {
-                    drives.push(driveToPush)
-                } else {
-                    // let index = 0;
-                    drives.every((existingDrive, index) => {
-                        const availableSizeExistingDrive = existingDrive.limit - existingDrive.usage;
-                        if (availableSizeEachDrive > availableSizeExistingDrive) {
-                            arr.splice(index - 1, 0, driveToPush);
-                            return false;
-                        } else if (index === drives.length - 1) {
-                            drives.push(driveToPush)
+
+                // refresh the storage
+                getDriveObject(key, (drive) => {
+                    drive.about.get({ fields: "user,storageQuota" }).then(data => {
+                        const driveAbout = data.data;
+                        driveAbout.storageQuota.usageInGB = CommonUtil.getReadableFileSizeString(driveAbout.storageQuota.usage);
+                        driveAbout.storageQuota.totalInGB = CommonUtil.getReadableFileSizeString(driveAbout.storageQuota.limit);
+                        // driveAbout.user.token = token;
+                        updateDB('users' + '/akanabkhan' + '/drives/' + driveAbout.user.emailAddress.split('@')[0], 'storageQuota', driveAbout.storageQuota)
+                        
+                        const eachDrive = driveAbout;
+                        const availableSizeEachDrive = eachDrive.storageQuota.limit - eachDrive.storageQuota.usage;
+                        const driveToPush = {
+                            email: eachDrive.user.emailAddress,
+                            availableSpace: availableSizeEachDrive,
+                            ...eachDrive.storageQuota
                         }
-                        // index++;
-                    });
-                }
+                        if (drives.length === 0) {
+                            drives.push(driveToPush)
+                        } else {
+                            // let index = 0;
+                            drives.every((existingDrive, index) => {
+                                const availableSizeExistingDrive = existingDrive.limit - existingDrive.usage;
+                                if (availableSizeEachDrive > availableSizeExistingDrive) {
+                                    drives.splice(index - 1, 0, driveToPush);
+                                    return false;
+                                } else if (index === drives.length - 1) {
+                                    drives.push(driveToPush)
+                                }
+                                // index++;
+                            });
+                        }
+                        if (drives.length === keys.length) {
+                            onDriveArray(drives);
+                        }
+                    })
+                    }, onError)
+
+
             });
-            onDriveArray(drives);
+            // onDriveArray(drives);
         }, onError)
     },
 
@@ -125,7 +143,7 @@ module.exports.GDriveXService = {
                         // const availableDriveSpace = drive.availableSpace;
 
                         // To try part upload of file, simulate a scenario of limited space
-                        const availableDriveSpace = 500000000;
+                        const availableDriveSpace = 1000000000;
                         schema.clustors.push({
                             index,
                             drive:drive.email.split('@')[0],
@@ -253,7 +271,7 @@ function getAccessToken(drive, onSuccess, onError) {
         } else {
             // token has expired, get new token
             CommonUtil.getCredentials((credentials) => {
-                oAuth2Client = GDriveService.authorize(credentials);
+                /*oAuth2Client = GDriveService.authorize(credentials);
                 oAuth2Client.setCredentials(token);
 
                 oAuth2Client.refreshAccessToken((err, credentials, res) => {
@@ -265,7 +283,36 @@ function getAccessToken(drive, onSuccess, onError) {
                         updateUserToken(drive, token)
                         onSuccess(token)
                     }
-                })
+                })*/
+                request(
+                    {
+                        method: "POST",
+                        url:
+                          "https://oauth2.googleapis.com/token",
+                        headers: {
+                          'Content-Type': "application/x-www-form-urlencoded"
+                        },
+                        form: {
+                            client_id: credentials.installed.client_id,
+                            client_secret: credentials.installed.client_secret,
+                            refresh_token: token.refresh_token,
+                            grant_type: 'refresh_token'
+                        }
+                    }, (error, response, body) => {
+                        if (error) {
+                            onError(error)
+                        } else {
+                            if (body && body.access_token) {
+                                token.access_token = body.access_token
+                                token.expiry_date = body.expires_in
+                                updateUserToken(drive, token)
+                                onSuccess(token)
+                            } else {
+                                onError("Reconnect drive " + drive)
+                            }
+                        }
+                    }
+                );
             })
 
                 /*
@@ -304,7 +351,7 @@ function updateUserToken(driveUser, token) {
 }
 
 
-function getDriveObject(driveUser, onDrive) {
+function getDriveObject(driveUser, onDrive, onError) {
     if (!driveUser) {
         driveUser = UserService.getLoggedInUser().username;
     }
@@ -318,7 +365,7 @@ function getDriveObject(driveUser, onDrive) {
             const drive = google.drive({version: 'v3', auth:oAuth2Client});
             onDrive(drive)
         });
-    }, (err) => {console.log(err)})
+    }, onError)
 }
 
 function authorize(credentials) {
