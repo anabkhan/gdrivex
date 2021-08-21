@@ -27,7 +27,7 @@ module.exports.CommonUtil = {
     },
 
     generateKeyForFileName: (fileName) => {
-        return fileName.split('.').join('-*-')
+        return fileName.split('.').join('-*-').split('[').join('').split(']').join('')
     },
 
     getCredentials: (onSuccess) => {
