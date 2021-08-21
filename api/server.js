@@ -11,6 +11,7 @@ const { GDriveXService } = require('./services/gdrivex');
 const { Readable, Stream } = require('stream');
 const { FileService } = require('./services/files');
 const path = require('path');
+const { CltsService } = require('./services/clts/clts');
 app.use(express.json());
 app.use(cors())
 const port = process.env.PORT || process.env.VCAP_APP_PORT || 3001;
@@ -135,6 +136,14 @@ app.post('/deleteFile', async (req,res) => {
 
 app.get('/getUploadStatus', async (req, res) => {
   res.send(CommonUtil.createSuccessMessage(FileService.getUploadStatus(), 'Upload status'))
+})
+
+app.get('/listFilesFromMagnet', async (req, res) => {
+  CltsService.getTorrentFiles(req.query.magnet, (files) => {
+    res.send(CommonUtil.createSuccessMessage(files, "Files from magnet"))
+  }, (err) => {
+    res.status(400).send(CommonUtil.createFailureMessage(err))
+  })
 })
 
 

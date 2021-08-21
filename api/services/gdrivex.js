@@ -65,7 +65,7 @@ module.exports.GDriveXService = {
                     drives.every((existingDrive, index) => {
                         const availableSizeExistingDrive = existingDrive.limit - existingDrive.usage;
                         if (availableSizeEachDrive > availableSizeExistingDrive) {
-                            arr.splice(index - 1, 0, driveToPush);
+                            drives.splice(index - 1, 0, driveToPush);
                             return false;
                         } else if (index === drives.length - 1) {
                             drives.push(driveToPush)
