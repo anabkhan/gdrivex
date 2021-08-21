@@ -92,21 +92,23 @@ module.exports.FileService = {
     deleteFile: (name, onSuccess, onError) => {
         getFileSchemaFromName(name, (schema) => {
             // delete file from clusor drive
-            schema.clustors.forEach(clustor => {
-                GDriveXService.getDriveObject(clustor.drive, (drive) => {
-                    drive.files.delete({
-                        fileId: clustor.fileID,
-                      }, (err, res) => {
-                          if (err) {
-                            //   onError(err)
-                            console.log('File clustor deletion failed',err)
-                          } else {
-                            //   onSuccess(res)
-                            console.log('File clustor deleted')
-                          }
-                      })
+            if (schema && schema.clustors) {
+                schema.clustors.forEach(clustor => {
+                    GDriveXService.getDriveObject(clustor.drive, (drive) => {
+                        drive.files.delete({
+                            fileId: clustor.fileID,
+                          }, (err, res) => {
+                              if (err) {
+                                //   onError(err)
+                                console.log('File clustor deletion failed',err)
+                              } else {
+                                //   onSuccess(res)
+                                console.log('File clustor deleted')
+                              }
+                          })
+                    });
                 });
-            });
+            }
 
             onSuccess("File deletion started")
 

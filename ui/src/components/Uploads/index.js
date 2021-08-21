@@ -30,6 +30,8 @@ export const Uploads = (open) => {
     }
 
     useEffect(() => {
+        
+        fetchUpdateTasks();
 
         var task = setInterval(() => {
             fetchUpdateTasks();
