@@ -151,7 +151,7 @@ module.exports.GDriveXService = {
                         // const availableDriveSpace = drive.availableSpace;
 
                         // To try part upload of file, simulate a scenario of limited space
-                        const availableDriveSpace = 500000000;
+                        const availableDriveSpace = 5242880;
                         schema.clustors.push({
                             index,
                             drive:drive.email.split('@')[0],
@@ -252,7 +252,7 @@ module.exports.GDriveXService = {
                 {
                     method: "PUT",
                     url: resumableUri,
-                    headers: { 'Authorization': `Bearer ${token.access_token}`, "Content-Range": `bytes ${offset}-${end}/${size}`, "Content-Length": size },
+                    headers: { 'Authorization': `Bearer ${token.access_token}`, "Content-Range": `bytes ${offset}-${end}/${size}`, "Content-Length": (end-offset)+1 },
                     body: fileDataStream
                 }, (error, response, body) => {
                     if (error) {

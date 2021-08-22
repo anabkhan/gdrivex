@@ -1,4 +1,5 @@
 var torrentStream = require('./torrent-stream');
+let engines = {};
 module.exports.CltsService = {
     getTorrentFiles : (torrentId, onData, onError) => {
         let engine = torrentStream(torrentId);
@@ -18,8 +19,28 @@ module.exports.CltsService = {
         });
     },
 
-    streamTorrent : (magnet, file, start , end, readableStream) => {
-        let engine = torrentStream(magnet);
+    createEngine: (magnet, onEngine, onError) => {
+        if (engines[magnet]) {
+            onEngine(engines[magnet])
+        } else {
+            let engine = torrentStream(magnet);
+            engine.on('ready', function () {
+                engines[magnet] = engine;
+                onEngine(engine)
+            });
+        }
+    },
+
+    streamTorrent : (engine, file, start , end, readableStream) => {
+            var fileToDownload = engine.files[file.id];
+
+            var stream = fileToDownload.createReadStream({
+                start,
+                end
+            });
+
+            stream.pipe(readableStream)
+        /*let engine = torrentStream(magnet);
         engine.on('ready', function () {
 
             var offset = start + file.offset;
@@ -36,18 +57,6 @@ module.exports.CltsService = {
 
             stream.pipe(readableStream)
 
-            // engine.select(startPiece, endPiece, true, null);
-
-            // const readableStream = new Stream.Readable({
-            //     read() {}
-            // })
-
-            // readableStream.pipe(writeStream)
-
-            // engine.on('download', (index, buffer) => {
-            //     readableStream.push(buffer);
-            // })
-
-        });
+        });*/
     }
 }
