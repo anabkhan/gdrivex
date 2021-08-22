@@ -211,7 +211,11 @@ module.exports.GDriveXService = {
         })
     },
 
-    getFileResumeStatus: (drive, resumableUri, onResponse, onError) => {
+    getFileResumeStatus: (drive, resumableUri, resume, onResponse, onError) => {
+
+        // if (resume) {
+            
+        // }
 
         onResponse({
             statusCode: 400
@@ -242,13 +246,13 @@ module.exports.GDriveXService = {
 
     // },
 
-    uploadOrResumeFile: (resumableUri, offset, size, fileDataStream, drive, onError, onSuccess) => {
+    uploadOrResumeFile: (resumableUri, offset, end, size, fileDataStream, drive, onError, onSuccess) => {
         getAccessToken(drive, (token) => {
             request(
                 {
                     method: "PUT",
                     url: resumableUri,
-                    headers: { 'Authorization': `Bearer ${token.access_token}`, "Content-Range": `bytes ${offset}-${size - 1}/${size}`, "Content-Length": size },
+                    headers: { 'Authorization': `Bearer ${token.access_token}`, "Content-Range": `bytes ${offset}-${end}/${size}`, "Content-Length": size },
                     body: fileDataStream
                 }, (error, response, body) => {
                     if (error) {
