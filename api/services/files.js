@@ -36,24 +36,27 @@ module.exports.FileService = {
                         // File Download was failed or aborted, ask to resume or overwrite
                         onError(CommonUtil.createFailureMessage(Messages.FILE_FAILED_EXISTS))
                     } else {
-                        let offset = 0, size = 0;
-                        let index = 0;
+                        // let offset = 0, size = 0;
+                        // let index = 0;
                         fileUploadStatus[schema.file.name] = {
                             total: info.size,
                             downloaded: new Array(schema.uploadTask.clustors.length)
                         };
                         let uploadTaskCalls = []
-                        // if (url.startsWith('magnet')) {
-                            
-                        // }
-                        schema.uploadTask.clustors.forEach(clustor => {
-                            size = size + clustor.fileSize;
-                            // uploadTaskCalls.push(handleFileUploadForClustor(url, clustor, offset, size, info))
-                            fileUploadStatus[schema.file.name].downloaded[index] = 0;
-                            handleFileUploadForClustor(url, clustor, offset, 0, 0,  (size-1), info, false)
-                            offset = offset + clustor.fileSize;
-                            index++;
-                        });
+                        if (url.startsWith('magnet')) {
+                            CltsService.createEngine(url, (engine) => {
+                                startFileUploadForAllClustor(url, schema.uploadTask.clustors, info, engine)
+                            }, (err) => {})
+                        } else {
+                            schema.uploadTask.clustors.forEach(clustor => {
+                                size = size + clustor.fileSize;
+                                // uploadTaskCalls.push(handleFileUploadForClustor(url, clustor, offset, size, info))
+                                fileUploadStatus[schema.file.name].downloaded[index] = 0;
+                                handleFileUploadForClustor(url, clustor, offset, 0, 0,  (size-1), info, false)
+                                offset = offset + clustor.fileSize;
+                                index++;
+                            });
+                        }
                         // Promise.all(uploadTaskCalls)
                         onSuccess('Download started')
                     }
@@ -135,6 +138,17 @@ module.exports.FileService = {
     getUploadStatus: () => {
         return fileUploadStatus;
     }
+}
+
+function startFileUploadForAllClustor(url, clustors, info, engine) {
+    let offset = 0, size = 0, index = 0;
+    clustors.forEach(clustor => {
+        size = size + clustor.fileSize;
+        fileUploadStatus[info.name].downloaded[index] = 0;
+        handleFileUploadForClustor(url, clustor, offset, 0, 0,  (size-1), info, false, engine)
+        offset = offset + clustor.fileSize;
+        index++;
+    });
 }
 
 function getFileSchemaFromName(fileName, onFileSchema, onError) {
@@ -239,7 +253,7 @@ function getFileInfoFromURL(url, onData, onError) {
     }
 }
 
-function handleFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, end, file, resume) {
+function handleFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, end, file, resume, engine) {
     // Upload the files in chunks
     // Size of chunks = ~2MB = 2000000 bytes
     const clustorSize = (end - offset) + 1;
@@ -253,12 +267,12 @@ function handleFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd,
         // start for next chunk
         driveOffset = driveOffset + chunkSize;
         if (chunkEnd < end ) {
-            handleFileUploadForClustor(url, clustor, chunkEnd+1, driveOffset, driveEnd, end, file, true)
+            handleFileUploadForClustor(url, clustor, chunkEnd+1, driveOffset, driveEnd, end, file, true, engine)
         }
-    }, resume)
+    }, resume, engine)
 }
 
-function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, end, file, onChunkUploaded, resume) {
+function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, end, file, onChunkUploaded, resume, engine) {
 
     console.log('starting uplaod of clustor',clustor)
 
@@ -311,11 +325,11 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
 
             const start = offset + nextOffset;
             if (url.startsWith('magnet')) {
-                CltsService.createEngine(url, (engine) => {
-                    CltsService.streamTorrent(engine, file, start , end, fileDataStream)
-                }, (error) => {
+                CltsService.streamTorrent(engine, file, start , end, fileDataStream)
+                // CltsService.createEngine(url, (engine) => {
+                // }, (error) => {
 
-                })
+                // })
             } else {
                 request({
                     headers: {
