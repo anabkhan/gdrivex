@@ -25,6 +25,7 @@ export const Uploads = (open) => {
             const statuses = [];
             keys.forEach(key => {
                 const status = response.data[key];
+                status.downloaded = status.downloaded.reduce((a, b) => a + b, 0)
                 statuses.push({
                     id: key,
                     item: status
