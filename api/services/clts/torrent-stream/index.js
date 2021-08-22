@@ -189,6 +189,7 @@ var torrentStream = function (link, opts, cb) {
           memStore.destroy(() => {
             console.log('memory chunk destroyed ');
           })
+          engine.store = null;
         })
 
         return stream
