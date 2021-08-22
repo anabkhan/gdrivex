@@ -7,6 +7,7 @@ const { GDriveService } = require("./gdrive")
 const fs = require('fs');
 const { UserService } = require("./users")
 const {google} = require('googleapis');
+var mime = require('mime-types')
 
 module.exports.GDriveXService = {
 
@@ -150,7 +151,7 @@ module.exports.GDriveXService = {
                         // const availableDriveSpace = drive.availableSpace;
 
                         // To try part upload of file, simulate a scenario of limited space
-                        const availableDriveSpace = 300000000;
+                        const availableDriveSpace = 500000000;
                         schema.clustors.push({
                             index,
                             drive:drive.email.split('@')[0],
@@ -181,6 +182,7 @@ module.exports.GDriveXService = {
         getData(dbPaths.uploadTaskClustors(CommonUtil.generateKeyForFileName(fileMetaData.name)) + `/${clustor.index}/resumableUri`,(resumableUri) => {    
             onResponse(resumableUri)
         }, (error) => {
+            var mimeType = mime.lookup(fileMetaData.name);
             getAccessToken(clustor.drive, (token) => {
                 request(
                     {
@@ -193,7 +195,7 @@ module.exports.GDriveXService = {
                         },
                         body: JSON.stringify({
                             name:fileMetaData.name,
-                            mimeType: 'audio/mp3'
+                            mimeType: mimeType ? mimeType : null
                         })
                     }, (error, response) => {
                         if (error) {

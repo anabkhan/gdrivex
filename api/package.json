@@ -34,6 +34,7 @@
     "hat": "0.0.3",
     "immediate-chunk-store": "^1.0.5",
     "ip-set": "^1.0.0",
+    "mime-types": "^2.1.32",
     "mkdirp": "^0.3.5",
     "parse-torrent": "^4.0.0",
     "peer-wire-swarm": "^0.12.0",
