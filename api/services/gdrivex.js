@@ -71,21 +71,28 @@ module.exports.GDriveXService = {
                         }
                         if (drives.length === 0) {
                             drives.push(driveToPush)
+                            if (drives.length === keys.length) {
+                                onDriveArray(drives);
+                            }
                         } else {
                             // let index = 0;
                             drives.every((existingDrive, index) => {
                                 const availableSizeExistingDrive = existingDrive.limit - existingDrive.usage;
                                 if (availableSizeEachDrive > availableSizeExistingDrive) {
                                     drives.splice(index - 1, 0, driveToPush);
+                                    if (drives.length === keys.length) {
+                                        onDriveArray(drives);
+                                    }
                                     return false;
                                 } else if (index === drives.length - 1) {
                                     drives.push(driveToPush)
                                 }
+                                if (drives.length === keys.length) {
+                                    onDriveArray(drives);
+                                }
+                                return true;
                                 // index++;
                             });
-                        }
-                        if (drives.length === keys.length) {
-                            onDriveArray(drives);
                         }
                     })
                     }, onError)
@@ -143,7 +150,7 @@ module.exports.GDriveXService = {
                         // const availableDriveSpace = drive.availableSpace;
 
                         // To try part upload of file, simulate a scenario of limited space
-                        const availableDriveSpace = 1000000000;
+                        const availableDriveSpace = 300000000;
                         schema.clustors.push({
                             index,
                             drive:drive.email.split('@')[0],

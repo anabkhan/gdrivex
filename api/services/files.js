@@ -315,6 +315,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                 fileUploadStatus[file.name].failReason = error;
             }, (response) => {
                 try {
+                    console.log('response from uploadOrResumeFile', response)
                     response = JSON.parse(response);
                     if (response && response.id) {
                         // File successfully uploaded
