@@ -47,7 +47,7 @@ module.exports.FileService = {
                             size = size + clustor.fileSize;
                             // uploadTaskCalls.push(handleFileUploadForClustor(url, clustor, offset, size, info))
                             fileUploadStatus[schema.file.name].downloaded[index] = 0;
-                            handleFileUploadForClustor(url, clustor, offset, size, info)
+                            handleFileUploadForClustor(url, clustor, offset, (size-1), info, false)
                             offset = offset + clustor.fileSize;
                             index++;
                         });
@@ -236,7 +236,24 @@ function getFileInfoFromURL(url, onData, onError) {
     }
 }
 
-function handleFileUploadForClustor(url, clustor, offset, size, file) {
+function handleFileUploadForClustor(url, clustor, offset, end, file, resume) {
+    // Upload the files in chunks
+    // Size of chunks = ~2MB = 2000000 bytes
+    const clustorSize = (end - offset) + 1;
+    const defaultChunkSize = 2000000;
+    const chunkSize = clustorSize < defaultChunkSize ? clustorSize : defaultChunkSize;
+    const chunkEnd = offset + chunkSize - 1;
+
+    startFileUploadForClustor(url, clustor, offset, chunkEnd, file, () => {
+        // chunk is uploaded
+        // start for next chunk
+        if (chunkEnd < end ) {
+            handleFileUploadForClustor(url, clustor, chunkEnd+1, end, file, true)
+        }
+    }, resume)
+}
+
+function startFileUploadForClustor(url, clustor, offset, end, file, onChunkUploaded, resume) {
 
     console.log('starting uplaod of clustor',clustor)
 
@@ -262,7 +279,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
         // Update uploadTask clustor with resumable URI
         clustor.resumableUri = resumableUri;
         GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor);
-        GDriveXService.getFileResumeStatus(clustor.drive, resumableUri, (response) => {
+        GDriveXService.getFileResumeStatus(clustor.drive, resumableUri, resume, (response) => {
             // console.log(response)
             let nextOffset = 0;
             switch (response.statusCode) {
@@ -287,7 +304,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
 
             const fileDataStream = new Stream.PassThrough();
 
-            const start = offset + nextOffset, end = size - 1;
+            const start = offset + nextOffset;
             if (url.startsWith('magnet')) {
                 CltsService.streamTorrent(url, file, start , end, fileDataStream)
             } else {
@@ -313,7 +330,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
             clustor.started = true;
             GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
 
-            GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
+            GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, end, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
                 fileUploadStatus[file.name].failed = true;
                 fileUploadStatus[file.name].failReason = error;
@@ -324,6 +341,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                     if (response && response.id) {
                         // File successfully uploaded
                         // Update the uploadTask
+                        onChunkUploaded();
                         console.log('Clustor upload finished',response);
                         clustor.completed = true;
                         GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
@@ -333,6 +351,9 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
                         if (fileUploadStatus[file.name].downloaded >= fileUploadStatus[file.name].size) {
                             delete fileUploadStatus[file.name];
                         }
+                    } else {
+                        fileUploadStatus[file.name].failed = true;
+                        fileUploadStatus[file.name].failReason = response;
                     }
                 } catch (error) {
                     console.log(error)
