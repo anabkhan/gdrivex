@@ -311,6 +311,7 @@ function getAccessToken(drive, onSuccess, onError) {
                         if (error) {
                             onError(error)
                         } else {
+                            body = JSON.parse(body)
                             if (body && body.access_token) {
                                 token.access_token = body.access_token
                                 token.expiry_date = body.expires_in

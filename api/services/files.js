@@ -11,7 +11,7 @@ const { CltsService } = require('./clts/clts');
 let fileUploadStatus = {
     'delicate.mp3': {
         size: 9398144,
-        downloaded: 5398144,
+        downloaded: [5398144],
         failed: false
     }
 };
@@ -40,14 +40,18 @@ module.exports.FileService = {
                         let index = 0;
                         fileUploadStatus[schema.file.name] = {
                             total: info.size,
-                            downloaded: 0
+                            downloaded: new Array(schema.uploadTask.clustors.length)
                         };
+                        let uploadTaskCalls = []
                         schema.uploadTask.clustors.forEach(clustor => {
                             size = size + clustor.fileSize;
+                            // uploadTaskCalls.push(handleFileUploadForClustor(url, clustor, offset, size, info))
+                            fileUploadStatus[schema.file.name].downloaded[index] = 0;
                             handleFileUploadForClustor(url, clustor, offset, size, info)
                             offset = offset + clustor.fileSize;
                             index++;
                         });
+                        // Promise.all(uploadTaskCalls)
                         onSuccess('Download started')
                     }
                 }
@@ -303,7 +307,7 @@ function handleFileUploadForClustor(url, clustor, offset, size, file) {
             fileDataStream.on('data', (data) => {
                 // console.log(data)
                 // update status
-                fileUploadStatus[file.name].downloaded = fileUploadStatus[file.name].downloaded + data.length
+                fileUploadStatus[file.name].downloaded[clustor.index] = fileUploadStatus[file.name].downloaded[clustor.index] + data.length
             })
 
             clustor.started = true;

@@ -20,6 +20,7 @@ var bufferFrom = require('buffer-from')
 var blocklist = require('ip-set')
 var exchangeMetadata = require('./lib/exchange-metadata')
 var fileStream = require('./lib/file-stream')
+var MemoryChunkStore = require('memory-chunk-store')
 
 var MAX_REQUESTS = 5
 var CHOKE_TIMEOUT = 5000
@@ -137,7 +138,7 @@ var torrentStream = function (link, opts, cb) {
     //     }
     //   })
     // }))
-    engine.store = new ImmediateChunkStore(new FSChunkStore(torrent.pieceLength))
+    engine.store = new ImmediateChunkStore(new MemoryChunkStore(torrent.pieceLength))
     engine.torrent = torrent
     engine.bitfield = bitfield(torrent.pieces.length)
 
