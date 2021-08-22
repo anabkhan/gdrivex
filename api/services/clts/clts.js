@@ -27,7 +27,16 @@ module.exports.CltsService = {
             startPiece = (offset / pieceLength) | 0;
             endPiece = ((end + file.offset) / pieceLength) | 0;
 
-            engine.select(startPiece, endPiece, true, null);
+            var fileToDownload = engine.files[file.id];
+
+            var stream = fileToDownload.createReadStream({
+                start,
+                end
+            });
+
+            stream.pipe(readableStream)
+
+            // engine.select(startPiece, endPiece, true, null);
 
             // const readableStream = new Stream.Readable({
             //     read() {}
@@ -35,9 +44,9 @@ module.exports.CltsService = {
 
             // readableStream.pipe(writeStream)
 
-            engine.on('download', (index, buffer) => {
-                readableStream.push(buffer);
-            })
+            // engine.on('download', (index, buffer) => {
+            //     readableStream.push(buffer);
+            // })
 
         });
     }
