@@ -151,7 +151,7 @@ module.exports.GDriveXService = {
                         // const availableDriveSpace = drive.availableSpace;
 
                         // To try part upload of file, simulate a scenario of limited space
-                        const availableDriveSpace = 5242880;
+                        const availableDriveSpace = 52428800;
                         schema.clustors.push({
                             index,
                             drive:drive.email.split('@')[0],
