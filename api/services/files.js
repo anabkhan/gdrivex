@@ -43,11 +43,14 @@ module.exports.FileService = {
                             downloaded: new Array(schema.uploadTask.clustors.length)
                         };
                         let uploadTaskCalls = []
+                        // if (url.startsWith('magnet')) {
+                            
+                        // }
                         schema.uploadTask.clustors.forEach(clustor => {
                             size = size + clustor.fileSize;
                             // uploadTaskCalls.push(handleFileUploadForClustor(url, clustor, offset, size, info))
                             fileUploadStatus[schema.file.name].downloaded[index] = 0;
-                            handleFileUploadForClustor(url, clustor, offset, (size-1), info, false)
+                            handleFileUploadForClustor(url, clustor, offset, 0, 0,  (size-1), info, false)
                             offset = offset + clustor.fileSize;
                             index++;
                         });
@@ -236,24 +239,26 @@ function getFileInfoFromURL(url, onData, onError) {
     }
 }
 
-function handleFileUploadForClustor(url, clustor, offset, end, file, resume) {
+function handleFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, end, file, resume) {
     // Upload the files in chunks
     // Size of chunks = ~2MB = 2000000 bytes
     const clustorSize = (end - offset) + 1;
-    const defaultChunkSize = 2000000;
+    const defaultChunkSize = 524288;
     const chunkSize = clustorSize < defaultChunkSize ? clustorSize : defaultChunkSize;
     const chunkEnd = offset + chunkSize - 1;
+    driveEnd = driveOffset + chunkSize - 1;
 
-    startFileUploadForClustor(url, clustor, offset, chunkEnd, file, () => {
+    startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd,  chunkEnd, file, () => {
         // chunk is uploaded
         // start for next chunk
+        driveOffset = driveOffset + chunkSize;
         if (chunkEnd < end ) {
-            handleFileUploadForClustor(url, clustor, chunkEnd+1, end, file, true)
+            handleFileUploadForClustor(url, clustor, chunkEnd+1, driveOffset, driveEnd, end, file, true)
         }
     }, resume)
 }
 
-function startFileUploadForClustor(url, clustor, offset, end, file, onChunkUploaded, resume) {
+function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, end, file, onChunkUploaded, resume) {
 
     console.log('starting uplaod of clustor',clustor)
 
@@ -306,7 +311,11 @@ function startFileUploadForClustor(url, clustor, offset, end, file, onChunkUploa
 
             const start = offset + nextOffset;
             if (url.startsWith('magnet')) {
-                CltsService.streamTorrent(url, file, start , end, fileDataStream)
+                CltsService.createEngine(url, (engine) => {
+                    CltsService.streamTorrent(engine, file, start , end, fileDataStream)
+                }, (error) => {
+
+                })
             } else {
                 request({
                     headers: {
@@ -330,18 +339,18 @@ function startFileUploadForClustor(url, clustor, offset, end, file, onChunkUploa
             clustor.started = true;
             GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
 
-            GDriveXService.uploadOrResumeFile(resumableUri, nextOffset, end, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
+            GDriveXService.uploadOrResumeFile(resumableUri, driveOffset, driveEnd, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
                 fileUploadStatus[file.name].failed = true;
                 fileUploadStatus[file.name].failReason = error;
             }, (response) => {
                 try {
                     console.log('response from uploadOrResumeFile', response)
+                    onChunkUploaded();
                     response = JSON.parse(response);
                     if (response && response.id) {
                         // File successfully uploaded
                         // Update the uploadTask
-                        onChunkUploaded();
                         console.log('Clustor upload finished',response);
                         clustor.completed = true;
                         GDriveXService.updateClustorOfUploadTask(fileNameKey, clustor)
