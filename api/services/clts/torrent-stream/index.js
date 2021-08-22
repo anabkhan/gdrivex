@@ -138,7 +138,7 @@ var torrentStream = function (link, opts, cb) {
     //     }
     //   })
     // }))
-    engine.store = new ImmediateChunkStore(new MemoryChunkStore(torrent.pieceLength))
+    // engine.store = new ImmediateChunkStore(new MemoryChunkStore(torrent.pieceLength))
     engine.torrent = torrent
     engine.bitfield = bitfield(torrent.pieces.length)
 
@@ -172,12 +172,23 @@ var torrentStream = function (link, opts, cb) {
       }
 
       file.createReadStream = function (opts) {
+
+        var memStore = new MemoryChunkStore(torrent.pieceLength);
+
+        engine.store = new ImmediateChunkStore(memStore);
+
         var stream = fileStream(engine, file, opts)
 
         var notify = stream.notify.bind(stream)
         engine.select(stream.startPiece, stream.endPiece, true, notify)
         eos(stream, function () {
           engine.deselect(stream.startPiece, stream.endPiece, true, notify)
+          engine.store.destroy((asyncId) => {
+            console.log('immediate chunk destroyed ', asyncId);
+          });
+          memStore.destroy(() => {
+            console.log('memory chunk destroyed ');
+          })
         })
 
         return stream
