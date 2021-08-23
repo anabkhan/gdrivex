@@ -1,7 +1,8 @@
 var torrentStream = require('./torrent-stream');
+const { Readable } = require('stream');
 let engines = {};
 module.exports.CltsService = {
-    getTorrentFiles : (torrentId, onData, onError) => {
+    getTorrentFiles: (torrentId, onData, onError) => {
         let engine = torrentStream(torrentId);
         engine.on('ready', function () {
             var files = [];
@@ -15,7 +16,7 @@ module.exports.CltsService = {
                 });
             }
             engine.destroy();
-            onData({files,torrentId})
+            onData({ files, torrentId })
         });
     },
 
@@ -31,17 +32,73 @@ module.exports.CltsService = {
         }
     },
 
-    streamTorrent : (engine, file, start , end, readableStream) => {
-            var fileToDownload = engine.files[file.id];
+    streamTorrent: (engine, file, start, end, readableStream) => {
 
-            var stream = fileToDownload.createReadStream({
-                start,
-                end
-            });
+        var offset = start + file.offset;
+        var pieceLength = engine.torrent.pieceLength;
+        startPiece = (offset / pieceLength) | 0;
+        endPiece = ((end + file.offset) / pieceLength) | 0;
+        _critical = Math.min(1024 * 1024 / pieceLength, 2) | 1;
 
-            stream.pipe(readableStream)
-        /*let engine = torrentStream(magnet);
-        engine.on('ready', function () {
+        _offset = offset - startPiece * pieceLength;
+
+        _piece = startPiece;
+        pieces = {};
+
+
+        var currentPieceIndex = startPiece;
+        const stream = new Readable({
+            read() {
+                console.log('read requested for ', _piece);
+                // if (_piece > endPiece) {
+                //   return {};
+                // }
+                var piece = pieces[_piece];
+                if (piece) {
+                    if (_offset) {
+                        piece = piece.slice(_offset)
+                        _offset = 0
+                    }
+                    this.push(piece);
+                    console.log('buffer fetched for ', _piece);
+                    delete pieces[_piece];
+                    if (_piece >= endPiece) {
+                        this.push(null);
+                        this.destroy();
+                    }
+                    _piece++;
+                } else {
+                    _waitingFor = _piece;
+                    _piece++;
+                    // return engine.critical(_waitingFor, _critical)
+                }
+            }
+        });
+
+        engine.select(startPiece, endPiece, true, null)
+
+        engine.on('download', (index, buffer) => {
+            if (_waitingFor === index) {
+                console.log('pushing buffer to stream for', index);
+                if (_offset) {
+                    buffer = buffer.slice(_offset)
+                    _offset = 0
+                }
+                stream.push(buffer);
+                if (index >= endPiece) {
+                    stream.push(null);
+                    stream.destroy();
+                }
+                _waitingFor = -1;
+            } else {
+                pieces[index] = buffer;
+            }
+        })
+
+        stream.pipe(readableStream);
+
+
+        /*engine.on('ready', function () {
 
             var offset = start + file.offset;
             var pieceLength = engine.torrent.pieceLength;

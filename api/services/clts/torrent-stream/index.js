@@ -22,7 +22,7 @@ var exchangeMetadata = require('./lib/exchange-metadata')
 var fileStream = require('./lib/file-stream')
 var MemoryChunkStore = require('memory-chunk-store')
 
-var MAX_REQUESTS = 5
+var MAX_REQUESTS = 10
 var CHOKE_TIMEOUT = 5000
 var REQUEST_TIMEOUT = 30000
 var SPEED_THRESHOLD = 3 * piece.BLOCK_LENGTH
@@ -128,7 +128,7 @@ var torrentStream = function (link, opts, cb) {
   })
 
   var ontorrent = function (torrent) {
-    var storage = opts.storage || FSChunkStore
+    // var storage = opts.storage || FSChunkStore
     // engine.store = ImmediateChunkStore(storage(torrent.pieceLength, {
     //   files: torrent.files.map(function (file) {
     //     return {
@@ -173,9 +173,9 @@ var torrentStream = function (link, opts, cb) {
 
       file.createReadStream = function (opts) {
 
-        var memStore = new MemoryChunkStore(torrent.pieceLength);
+        // var memStore = new MemoryChunkStore(torrent.pieceLength);
 
-        engine.store = new ImmediateChunkStore(memStore);
+        // engine.store = new ImmediateChunkStore(memStore);
 
         var stream = fileStream(engine, file, opts)
 
@@ -183,13 +183,13 @@ var torrentStream = function (link, opts, cb) {
         engine.select(stream.startPiece, stream.endPiece, true, notify)
         eos(stream, function () {
           engine.deselect(stream.startPiece, stream.endPiece, true, notify)
-          engine.store.destroy((asyncId) => {
-            console.log('immediate chunk destroyed ', asyncId);
-          });
-          memStore.destroy(() => {
-            console.log('memory chunk destroyed ');
-          })
-          engine.store = null;
+          // engine.store.destroy((asyncId) => {
+          //   console.log('immediate chunk destroyed ', asyncId);
+          // });
+          // memStore.destroy(() => {
+          //   console.log('memory chunk destroyed ');
+          // })
+          // engine.store = null;
         })
 
         return stream
@@ -244,7 +244,7 @@ var torrentStream = function (link, opts, cb) {
       engine.emit('verify', index)
       engine.emit('download', index, buffer)
 
-      engine.store.put(index, buffer)
+      // engine.store.put(index, buffer)
       gc()
     }
 
