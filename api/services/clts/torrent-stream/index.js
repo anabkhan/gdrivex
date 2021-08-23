@@ -22,7 +22,7 @@ var exchangeMetadata = require('./lib/exchange-metadata')
 var fileStream = require('./lib/file-stream')
 var MemoryChunkStore = require('memory-chunk-store')
 
-var MAX_REQUESTS = 10
+var MAX_REQUESTS = 5
 var CHOKE_TIMEOUT = 5000
 var REQUEST_TIMEOUT = 30000
 var SPEED_THRESHOLD = 3 * piece.BLOCK_LENGTH

@@ -321,10 +321,15 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
                     break;
             }
 
-            const fileDataStream = new Stream.PassThrough();
+            let fileDataStream = new Stream.PassThrough();
 
             const start = offset + nextOffset;
             if (url.startsWith('magnet')) {
+                // const writableStream = new Stream.Writable()
+                // writableStream._write = (chunk, encoding, next) => {
+                //     fileDataStream.push(chunk, encoding)
+                //     next()
+                // }
                 CltsService.streamTorrent(engine, file, start , end, fileDataStream)
                 // CltsService.createEngine(url, (engine) => {
                 // }, (error) => {
