@@ -64,6 +64,7 @@ module.exports.CltsService = {
                         // stream = null;
                         // readableStream.end();
                         engine.deselect(startPiece, endPiece, true, null)
+                        stream = null;
                     }
                     _waitingFor = -1;
                 } else {
@@ -90,7 +91,8 @@ module.exports.CltsService = {
                             // this.push(null);
                             this.destroy();
                             // readableStream.end();
-                            engine.deselect(startPiece, endPiece, true, null)
+                            engine.deselect(startPiece, endPiece, true, null);
+                            stream = null;
                         }
                         _piece++;
                         return null;
