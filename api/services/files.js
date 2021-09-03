@@ -363,6 +363,8 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
                 fileUploadStatus[file.name].failed = true;
                 fileUploadStatus[file.name].failReason = error;
             }, (response) => {
+                fileDataStream.destroy();
+                fileDataStream = null;
                 try {
                     console.log('response from uploadOrResumeFile', response)
                     onChunkUploaded();
