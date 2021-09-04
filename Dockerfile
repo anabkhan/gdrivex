@@ -11,7 +11,7 @@ RUN cd /ui; npm install && npm build
 
 WORKDIR /app
 
-# ADD /ui/build /app/views
+ADD /ui/build /app/views
 ADD api/constants /app/constants
 ADD api/services /app/services
 ADD api/credentials.json /app
