@@ -6,6 +6,8 @@ COPY ui /ui
 # COPY ui/package.json /ui/package.json
 RUN cd /ui; npm install && npm build
 
+RUN ls /ui
+
 # RUN npm install 
 # RUN npm build
 
