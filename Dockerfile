@@ -1,8 +1,9 @@
 FROM node:12-alpine
 
-RUN cd ui; npm install && npm build
+ADD ui /ui
+RUN cd /ui; npm install && npm build
 
-ADD ui/build /app/views
+ADD /ui/build /app/views
 ADD api/constants /app/constants
 ADD api/services /app/services
 ADD api/credentials.json /app
