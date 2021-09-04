@@ -13,7 +13,6 @@ RUN echo $(ls -1 /ui)
 
 WORKDIR /app
 
-ADD /ui/build /app/views
 ADD api/constants /app/constants
 ADD api/services /app/services
 ADD api/credentials.json /app
@@ -22,6 +21,8 @@ ADD api/package.json /app
 ADD api/server.js /app
 
 RUN cd /app; npm install
+
+ADD /ui/build /app/views
 
 ENV NODE_ENV production
 ENV PORT 8080
