@@ -1,7 +1,8 @@
 FROM node:12-alpine
 
 COPY ui /reactui
-RUN cd /reactui
+COPY ui/package.json /reactui/package.json
+RUN cd /reactui; npm install
 
 RUN npm install 
 RUN npm build
