@@ -1,7 +1,7 @@
 FROM node:12-alpine
 
 ADD ui /ui/
-RUN cd /ui; npm install && npm build
+RUN cd /ui && ls && npm install && npm build
 
 ADD /ui/build /app/views
 ADD api/constants /app/constants
