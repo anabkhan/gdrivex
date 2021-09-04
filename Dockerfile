@@ -1,11 +1,15 @@
 FROM node:12-alpine
 
-COPY ui /reactui
-COPY ui/package.json /reactui/package.json
-RUN cd /reactui; npm install
+WORKDIR /ui
 
-RUN npm install 
-RUN npm build
+COPY ui /ui
+# COPY ui/package.json /ui/package.json
+RUN cd /ui; npm install && npm build
+
+# RUN npm install 
+# RUN npm build
+
+WORKDIR /app
 
 ADD /reactui/build /app/views
 ADD api/constants /app/constants
