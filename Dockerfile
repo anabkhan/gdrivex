@@ -22,7 +22,7 @@ ADD api/server.js /app
 
 RUN cd /app; npm install
 
-ADD /ui/build /app/views
+RUN cp -r /ui/build /app/views
 
 ENV NODE_ENV production
 ENV PORT 8080
