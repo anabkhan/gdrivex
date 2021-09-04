@@ -1,12 +1,12 @@
 FROM node:12-alpine
 
-COPY ui /ui
-RUN cd /ui
+COPY ui /reactui
+RUN cd /reactui
 
 RUN npm install 
 RUN npm build
 
-ADD /ui/build /app/views
+ADD /reactui/build /app/views
 ADD api/constants /app/constants
 ADD api/services /app/services
 ADD api/credentials.json /app
