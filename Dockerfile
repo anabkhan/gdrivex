@@ -2,9 +2,9 @@ FROM node:12-alpine
 
 WORKDIR /ui
 
-COPY ui /ui
+ADD ui /ui
 # COPY ui/package.json /ui/package.json
-RUN cd /ui; npm install && npm build
+RUN cd /ui; npm install && npm run build
 
 RUN echo $(ls -1 /ui)
 
