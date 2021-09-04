@@ -99,8 +99,8 @@ module.exports.CltsService = {
                     } else {
                         _waitingFor = _piece;
                         _piece++;
-                        return null;
-                        // return engine.critical(_waitingFor, _critical)
+                        // return null;
+                        return engine.critical(_waitingFor, _critical)
                     }
                 }
             });

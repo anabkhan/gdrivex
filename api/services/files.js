@@ -257,7 +257,7 @@ function handleFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd,
     // Upload the files in chunks
     // Size of chunks = ~2MB = 2000000 bytes
     const clustorSize = (end - offset) + 1;
-    const defaultChunkSize = 5242880;
+    const defaultChunkSize = 20971520;
     const chunkSize = clustorSize < defaultChunkSize ? clustorSize : defaultChunkSize;
     const chunkEnd = offset + chunkSize - 1;
     driveEnd = driveOffset + chunkSize - 1;
