@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { CREATE_MAGNET_UPLOAD_TASK, CREATE_UPLOAD_TASK, FILES_FROM_MAGNET, UPLOAD_STATUS } from '../../constants/REST_URLS';
+import { CANCEL_UPLOAD_TASK, CREATE_MAGNET_UPLOAD_TASK, CREATE_UPLOAD_TASK, FILES_FROM_MAGNET, UPLOAD_STATUS } from '../../constants/REST_URLS';
 import { get, post } from '../../services/RestService';
 import './uploads.css';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
@@ -8,6 +8,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import { getReadableFileSizeString } from '../../services/FileService';
 import { Checkbox } from '@material-ui/core';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 export const Uploads = (open) => {
 
@@ -138,6 +139,12 @@ export const Uploads = (open) => {
         }
     }
 
+    const cancelUploadTask = (id) => {
+        get(CANCEL_UPLOAD_TASK + '?id=' + id).then(res => {
+            console.log(res);
+        })
+    }
+
     return (
         <div className="uploads">
             <div className="newUploadTask">
@@ -190,6 +197,7 @@ export const Uploads = (open) => {
                                 </span>
                             }
                             {!item.failed && <span className="uploads__task__progress">{getReadableFileSizeString(item.downloaded)}/{getReadableFileSizeString(item.total)}</span>}
+                            <span onClick={() => {cancelUploadTask(id)}}><CancelIcon style={{color:'red', cursor:'pointer'}} /></span>
                         </div>
                     ))
                 }

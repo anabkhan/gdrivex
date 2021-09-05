@@ -4,7 +4,7 @@ const { CommonUtil } = require('./commonutil');
 const { GDriveXService } = require('./gdrivex');
 const { Stream } = require('stream');
 const { GDriveService } = require('./gdrive');
-const { getData, deleteData } = require('./fireabse');
+const { getData, deleteData, updateDB } = require('./fireabse');
 const { dbPaths } = require('../constants/FIREBASE_DB_PATHS');
 const { CltsService } = require('./clts/clts');
 
@@ -44,7 +44,7 @@ module.exports.FileService = {
                         };
                         let uploadTaskCalls = []
                         if (url.startsWith('magnet')) {
-                            CltsService.createEngine(url, (engine) => {
+                            CltsService.createEngine(url, info.name, (engine) => {
                                 startFileUploadForAllClustor(url, schema.uploadTask.clustors, info, engine)
                             }, (err) => {})
                         } else {
@@ -65,8 +65,11 @@ module.exports.FileService = {
         }, onError)
     },
 
-    downloadFromTorrent: (magnet) => {
-
+    cancelUploadTask: (fileName) => {
+        delete fileUploadStatus[fileName];
+        deleteData(dbPaths.uploadTask(CommonUtil.generateKeyForFileName(fileName)));
+        CltsService.destroyEngine(fileName);
+        CltsService.destroyReadStream(fileName);
     },
 
     downloadFile: (fileName, req, res, onError) => {
@@ -352,7 +355,11 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
             fileDataStream.on('data', (data) => {
                 // console.log(data)
                 // update status
-                fileUploadStatus[file.name].downloaded[clustor.index] = fileUploadStatus[file.name].downloaded[clustor.index] + data.length
+                if (fileUploadStatus[file.name]) {
+                    fileUploadStatus[file.name].downloaded[clustor.index] = fileUploadStatus[file.name].downloaded[clustor.index] + data.length
+                } else {
+                    fileDataStream.end();
+                }
             })
 
             clustor.started = true;
@@ -360,14 +367,18 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
 
             GDriveXService.uploadOrResumeFile(resumableUri, driveOffset, driveEnd, clustor.fileSize, fileDataStream, clustor.drive, (error)=> {
                 console.error(error)
-                fileUploadStatus[file.name].failed = true;
-                fileUploadStatus[file.name].failReason = error;
+                if (fileUploadStatus[file.name]) {
+                    fileUploadStatus[file.name].failed = true;
+                    fileUploadStatus[file.name].failReason = error;
+                }
             }, (response) => {
                 fileDataStream.destroy();
                 fileDataStream = null;
                 try {
                     console.log('response from uploadOrResumeFile', response)
-                    onChunkUploaded();
+                    if (fileUploadStatus[file.name]) {
+                        onChunkUploaded();
+                    }
                     response = JSON.parse(response);
                     if (response && response.id) {
                         // File successfully uploaded
@@ -378,8 +389,12 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
                         console.log(response)
                         clustor.fileID = response.id;
                         GDriveXService.updateClustorOfSchema(fileNameKey, clustor)
-                        if (fileUploadStatus[file.name].downloaded >= fileUploadStatus[file.name].size) {
-                            delete fileUploadStatus[file.name];
+                        if (fileUploadStatus[file.name] && fileUploadStatus[file.name].downloaded) {
+                            if (fileUploadStatus[file.name].downloaded.reduce((a, b) => a + b, 0) >= fileUploadStatus[file.name].size) {
+                                delete fileUploadStatus[file.name];
+                                updateDB(dbPaths.fileSchema(fileNameKey) + '/file', 'completed', true);
+                                console.log('File dowloaded successfully', file.name);
+                            }
                         }
                     } else {
                         fileUploadStatus[file.name].failed = true;
