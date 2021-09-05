@@ -5,7 +5,7 @@ import '../../styles/DriveItem.css'
 
 const DriveItem = ({email,capacity, usedPercentage, status}) => {
     return (
-        <div className='driveItem' style={{background:`linear-gradient(to right, rgb(237 237 237 / 61%) ${usedPercentage}%, white 0%)`}}>
+        <div className='driveItem' style={{background:`linear-gradient(to right, #5a53536e ${usedPercentage}%, #202124 0%)`}}>
             <div className='driveItem--left'>
                 <p>{email}</p>
             </div>

@@ -37,6 +37,7 @@
     /* height: 1.2em; */
     white-space: nowrap;
     flex: 1;
+    background: none!important;
 }
 
 .torrent_file_selection {

@@ -11,3 +11,61 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+* > * {
+  background: #202124;
+  color: white !important;
+}
+
+div[class^="makeStyles-paper-"] {
+  background: #202124 !important;
+}
+
+div[role="presentation"] {
+  background: transparent !important;
+}
+
+.makeStyles-paper-1 {
+  background: #202124 !important;
+}
+
+.button-green {
+  background: green !important;
+}
+
+.button-green > *{
+  background: green !important;
+}
+
+.MuiListItem-button {
+  color: white !important;
+}
+
+.MuiTouchRipple-root {
+  background: none !important;
+}
+
+.MuiPaper-root {
+  background-color: transparent !important;
+}
+
+.MuiListItem-button:hover {
+  background-color: #403939fa !important;
+}
+
+.MuiAlert-filledSuccess {
+  background-color: #4caf50 !important;
+}
+
+.MuiAlert-filledSuccess > * {
+  background-color: #4caf50 !important;
+}
+
+.MuiAlert-filledError > * {
+  background-color: #f44336 !important;
+  background: #f44336 !important;
+}
+
+/* .MuiAlert-filledSuccess >  {
+  background-color: #4caf50 !important;
+} */

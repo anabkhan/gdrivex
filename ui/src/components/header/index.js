@@ -10,13 +10,12 @@ const index = () => {
                 <img src={GDriveLogo} alt="" />
                 <span>DriveX</span>
             </div>
-            <div className='header__searchContainer'>
+            {/* <div className='header__searchContainer'>
                 <div className="header__searchBar">
                     <SearchIcon/>
                     <input type='text' placeholder='Search in Drive'/>
-                    {/* <ExpandMoreIcon/> */}
                 </div>
-            </div>
+            </div> */}
             <div className='header__icons' >
 
             </div>
