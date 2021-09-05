@@ -11,3 +11,28 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+* > * {
+  background: #202124;
+  color: white;
+}
+
+div[class^="makeStyles-paper-"] {
+  background: #202124 !important;
+}
+
+div[role="presentation"] {
+  background: transparent !important;
+}
+
+.makeStyles-paper-1 {
+  background: #202124 !important;
+}
+
+.button-green {
+  background: green !important;
+}
+
+.button-green > *{
+  background: green !important;
+}

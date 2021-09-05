@@ -149,7 +149,7 @@ export const Uploads = (open) => {
         <div className="uploads">
             <div className="newUploadTask">
                 <input type="text" placeholder="  Enter url or magnet" className="newUploadTask__input" value={newTaskUrl} onChange={handleChange} />
-                <span className="newUploadTask__submit" onClick={handleUploadSubmit}>
+                <span className="newUploadTask__submit button-green" onClick={handleUploadSubmit}>
                     <CloudUploadIcon style={{ color: 'green' }} />
                     <text style={{ marginLeft: '5px' }}>Upload</text>
                 </span>

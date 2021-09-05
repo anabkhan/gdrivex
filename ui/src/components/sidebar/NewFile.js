@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         width: 400,
         backgroundColor: theme.palette.background.paper,
+        background: '#202124',
         // border: '2px solid #000',
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3)
@@ -109,7 +110,7 @@ export const NewFile = () => {
 
     return (
         <div className='newFile'>
-            <div className='newFile__container' onClick={handleOpen}>
+            <div className='newFile__container button-green' onClick={handleOpen}>
                 <CloudUploadIcon  style={{color:'green'}}/>
                 <p>Uploads</p>
             </div>
