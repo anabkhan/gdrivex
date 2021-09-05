@@ -91,7 +91,7 @@ module.exports.FileService = {
                 "Accept-Ranges": "bytes",
                 "Content-Length": chunksize,
                 // "Content-Type": "video/" + fileName.split('.').pop(),
-                "Content-Disposition": "attachment; filename="+fileName
+                "Content-Disposition": "attachment; filename="+fileName.replace(/[/\\?%*:|"’<>]/g, '-')
             });
             
             const readableStream = new Stream.Readable({
