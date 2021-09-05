@@ -66,40 +66,35 @@ module.exports.CltsService = {
         _piece = startPiece;
         pieces = {};
 
-        
+
         let stream = new Readable({
             read() {
                 console.log('read requested for ', _piece);
-                // if (_piece > endPiece) {
-                    //   return {};
-                    // }
-                    var piece = pieces[_piece];
-                    if (piece) {
-                        if (_offset) {
-                            piece = piece.slice(_offset)
-                            _offset = 0
-                        }
-                        this.push(piece);
-                        console.log('buffer fetched for ', _piece);
-                        delete pieces[_piece];
-                        if (_piece >= endPiece) {
-                            // this.push(null);
-                            this.destroy();
-                            // readableStream.end();
-                            engine.deselect(startPiece, endPiece, true, null);
-                            stream = null;
-                        }
-                        _piece++;
-                        return null;
-                    } else {
+                var piece = pieces[_piece];
+                if (piece) {
+                    if (_offset) {
+                        piece = piece.slice(_offset)
+                        _offset = 0
+                    }
+                    this.push(piece);
+                    console.log('buffer fetched for ', _piece);
+                    delete pieces[_piece];
+                    if (_piece >= endPiece) {
+                        this.destroy();
+                        engine.deselect(startPiece, endPiece, true, null);
+                        stream = null;
+                    }
+                    _piece++;
+                    return null;
+                } else {
                     _waitingFor = _piece;
                     _piece++;
-                    // return null;
                     return engine.critical(_waitingFor, _critical)
                 }
             }
         });
-        
+
+        engine.removeAllListeners();
         engine.on('download', (index, buffer) => {
             if (_waitingFor === index) {
                 console.log('pushing buffer to stream for', index);
@@ -108,12 +103,8 @@ module.exports.CltsService = {
                     _offset = 0
                 }
                 stream.push(buffer);
-                // stream.push(null);
                 if (index >= endPiece) {
-                    // stream.push(null);
                     stream.destroy();
-                    // stream = null;
-                    // readableStream.end();
                     engine.deselect(startPiece, endPiece, true, null)
                     stream = null;
                 }
@@ -122,13 +113,11 @@ module.exports.CltsService = {
                 pieces[index] = buffer;
             }
         })
-        
+
         streams[file.name] = stream;
-        
+
         stream.pipe(readableStream);
-        
+
         engine.select(startPiece, endPiece, true, null)
-        
-        engines[file] = engine;
     }
 }
