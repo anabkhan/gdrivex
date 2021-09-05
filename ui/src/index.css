@@ -21,6 +21,10 @@ div[class^="makeStyles-paper-"] {
   background: #202124 !important;
 }
 
+div[class^="jss"] {
+  background: #202124 !important;
+}
+
 div[role="presentation"] {
   background: transparent !important;
 }
