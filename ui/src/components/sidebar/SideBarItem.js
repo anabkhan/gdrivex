@@ -2,9 +2,9 @@ import { ArrowRight } from '@material-ui/icons'
 import React from 'react'
 import './../../styles/sidebaritem.css'
 
-export const SideBarItem = ({arrow, icon, label}) => {
+export const SideBarItem = ({arrow, icon, label, onClick}) => {
     return (
-        <div className='sideBarItem'>
+        <div className='sideBarItem' onClick={onClick}>
             {/* <div className='sideBarItem__arrow'>
                 {arrow && (<ArrowRight />)}
             </div> */}
