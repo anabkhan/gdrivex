@@ -50,7 +50,6 @@ export const NewFile = () => {
             console.log('files', statuses)
         }).catch((err) => {
             console.log(err);
-            alert(err);
         })
     }, [])
 

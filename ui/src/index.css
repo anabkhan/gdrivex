@@ -14,7 +14,7 @@ code {
 
 * > * {
   background: #202124;
-  color: white;
+  color: white !important;
 }
 
 div[class^="makeStyles-paper-"] {
@@ -36,3 +36,36 @@ div[role="presentation"] {
 .button-green > *{
   background: green !important;
 }
+
+.MuiListItem-button {
+  color: white !important;
+}
+
+.MuiTouchRipple-root {
+  background: none !important;
+}
+
+.MuiPaper-root {
+  background-color: transparent !important;
+}
+
+.MuiListItem-button:hover {
+  background-color: #403939fa !important;
+}
+
+.MuiAlert-filledSuccess {
+  background-color: #4caf50 !important;
+}
+
+.MuiAlert-filledSuccess > * {
+  background-color: #4caf50 !important;
+}
+
+.MuiAlert-filledError > * {
+  background-color: #f44336 !important;
+  background: #f44336 !important;
+}
+
+/* .MuiAlert-filledSuccess >  {
+  background-color: #4caf50 !important;
+} */

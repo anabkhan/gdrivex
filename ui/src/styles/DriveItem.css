@@ -11,7 +11,12 @@
 }
 
 .driveItem--left{
+    background: transparent !important;
     flex: 1;
+}
+
+.driveItem--left > * {
+    background: transparent !important;
 }
 
 .driveItem--left>p{

@@ -9,6 +9,7 @@ import { getReadableFileSizeString } from '../../services/FileService';
 import { Checkbox } from '@material-ui/core';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import CancelIcon from '@material-ui/icons/Cancel';
+import Notification from '../Notifications/Notifications';
 
 export const Uploads = (open) => {
 
@@ -19,6 +20,12 @@ export const Uploads = (open) => {
     const [torrentMagnet, setTorrentMagnet] = useState(null);
 
     const [selectedTorrentFiles, setSelectedTorrentFiles] = useState([]);
+
+    const [notification, setNotification] = useState({severity:'success', message: 'Default message', show: false});
+
+    const onNotificationClose = () => {
+        setNotification({severity:'success', message: 'Default message', show: false});
+    }
 
     const fetchUpdateTasks = () => {
         get(UPLOAD_STATUS).then((response) => {
@@ -92,14 +99,29 @@ export const Uploads = (open) => {
         }).then((res) => {
             if (res.status && res.status === 'Fail') {
                 console.log('Failure to start upload',res);
-                alert('Failure to start upload \n' + res.message);
+                // alert('Failure to start upload \n' + res.message);
+                setNotification({
+                    severity: 'error',
+                    message: 'Failure to start upload ' + res,
+                    show: true
+                })
             } else {
                 console.log('Upload started',res);
-                alert('Upload started');
+                // alert('Upload started');
+                setNotification({
+                    severity: 'success',
+                    message: 'Upload Started!',
+                    show: true
+                })
             }
         }).catch((err) => {
             console.log('Failure to start upload',err);
-            alert('Failure to start upload');
+            // alert('Failure to start upload');
+            setNotification({
+                severity: 'error',
+                message: 'Failure to start upload ' + err,
+                show: true
+            })
         })
     }
 
@@ -189,7 +211,7 @@ export const Uploads = (open) => {
             <div className="upload__tasks">
                 {
                     uploadStatus.map(({id, item}) => (
-                        <div className="uploads__single__task" style={{background:`linear-gradient(to right, rgb(118 232 169 / 98%) ${((item.downloaded / item.total) * 100)}%, white 0%)`}}>
+                        <div className="uploads__single__task" style={{background:`linear-gradient(to right, rgb(118 232 169 / 54%) 12.4264% ${((item.downloaded / item.total) * 100)}%, #202124 0%)`}}>
                             <span className="uploads__task__name">{id}</span>
                             {
                                 item.failed && <span>{item.failReason}
@@ -202,6 +224,8 @@ export const Uploads = (open) => {
                     ))
                 }
             </div>
+
+            {notification.show && <Notification severity={notification.severity} message={notification.message} show={notification.show} onClose={onNotificationClose} />}
         </div>
     )
 }

@@ -5,9 +5,15 @@ import '../../styles/FilesView.css';
 import { FileCard } from './FileCard';
 import { get } from '../../services/RestService';
 import { LIST_FILES } from '../../constants/REST_URLS';
+import Notification from '../Notifications/Notifications';
 
 export const FilesView = () => {
     const [files, setFiles] = useState([])
+    const [notification, setNotification] = useState({severity:'success', message: 'Default message', show: false});
+
+    const onNotificationClose = () => {
+        setNotification({severity:'success', message: 'Default message', show: false});
+    }
 
     const fetchFiles = () => {
         get(LIST_FILES).then((response) => {
@@ -24,7 +30,11 @@ export const FilesView = () => {
             console.log('files', files)
         }).catch((err) => {
             console.log(err);
-            alert(err);
+            setNotification({
+                severity: 'error',
+                message: 'Fail to get file ' + err,
+                show: true
+            })
         })
     }
 
@@ -58,6 +68,7 @@ export const FilesView = () => {
                     <FileItem id={id} caption={item.name} size={item.size} timestamp={item.timestamp} onDeleted={fetchFiles} />
                 ))
             }
+            {notification.show && <Notification severity={notification.severity} message={notification.message} show={notification.show} onClose={onNotificationClose} />}
         </div>
     )
 }
