@@ -390,10 +390,12 @@ function startFileUploadForClustor(url, clustor, offset, driveOffset, driveEnd, 
                         clustor.fileID = response.id;
                         GDriveXService.updateClustorOfSchema(fileNameKey, clustor)
                         if (fileUploadStatus[file.name] && fileUploadStatus[file.name].downloaded) {
-                            if (fileUploadStatus[file.name].downloaded.reduce((a, b) => a + b, 0) >= fileUploadStatus[file.name].size) {
+                            if (fileUploadStatus[file.name].downloaded.reduce((a, b) => a + b, 0) >= fileUploadStatus[file.name].total) {
                                 delete fileUploadStatus[file.name];
                                 updateDB(dbPaths.fileSchema(fileNameKey) + '/file', 'completed', true);
                                 console.log('File dowloaded successfully', file.name);
+                                CltsService.destroyEngine(file.name);
+                                CltsService.destroyReadStream(file.name)
                             }
                         }
                     } else {
