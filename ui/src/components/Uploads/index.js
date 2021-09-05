@@ -211,7 +211,7 @@ export const Uploads = (open) => {
             <div className="upload__tasks">
                 {
                     uploadStatus.map(({id, item}) => (
-                        <div className="uploads__single__task" style={{background:`linear-gradient(to right, rgb(118 232 169 / 54%) 12.4264% ${((item.downloaded / item.total) * 100)}%, #202124 0%)`}}>
+                        <div className="uploads__single__task" style={{background:`linear-gradient(to right, rgb(118 232 169 / 54%) ${((item.downloaded / item.total) * 100)}%, #202124 0%)`}}>
                             <span className="uploads__task__name">{id}</span>
                             {
                                 item.failed && <span>{item.failReason}

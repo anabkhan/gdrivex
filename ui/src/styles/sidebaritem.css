@@ -6,8 +6,10 @@
 }
 
 .sideBarItem:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+ /* background-color: #ffffff45; */
+    /* border: 1px solid #ffffff45; */
 }
+
 
 .sideBarItem__arrow {
     width: 28px;
