@@ -1,7 +1,7 @@
 var torrentStream = require('./torrent-stream');
 const { Readable } = require('stream');
 let engines = {};
-let stream;
+let streams = {};
 module.exports.CltsService = {
     getTorrentFiles: (torrentId, onData, onError) => {
         let engine = torrentStream(torrentId);
@@ -21,15 +21,35 @@ module.exports.CltsService = {
         });
     },
 
-    createEngine: (magnet, onEngine, onError) => {
-        if (engines[magnet]) {
+    createEngine: (magnet, id, onEngine, onError) => {
+        if (engines[id]) {
             onEngine(engines[magnet])
         } else {
             let engine = torrentStream(magnet);
             engine.on('ready', function () {
-                engines[magnet] = engine;
+                engines[id] = engine;
                 onEngine(engine)
             });
+        }
+    },
+
+    destroyEngine: (id) => {
+        if (engines[id]) {
+            engines[id].destroy();
+            delete engines[id];
+            console.log('Engine destroyed for ', id);
+        } else {
+            console.log('No engine found for ', id);
+        }
+    },
+
+    destroyReadStream: (id) => {
+        if (streams[id]) {
+            streams[id].destroy();
+            delete streams[id];
+            console.log('Read stream destroyed for ', id);
+        } else {
+            console.log('No read stream found for ', id);
         }
     },
 
@@ -42,37 +62,12 @@ module.exports.CltsService = {
         _critical = Math.min(1024 * 1024 / pieceLength, 2) | 1;
 
         _offset = offset - startPiece * pieceLength;
-        
+
         _piece = startPiece;
         pieces = {};
+
         
-        
-        if (!stream) {
-            // s
-            engine.on('download', (index, buffer) => {
-                if (_waitingFor === index) {
-                    console.log('pushing buffer to stream for', index);
-                    if (_offset) {
-                        buffer = buffer.slice(_offset)
-                        _offset = 0
-                    }
-                    stream.push(buffer);
-                    // stream.push(null);
-                    if (index >= endPiece) {
-                        // stream.push(null);
-                        stream.destroy();
-                        // stream = null;
-                        // readableStream.end();
-                        engine.deselect(startPiece, endPiece, true, null)
-                        stream = null;
-                    }
-                    _waitingFor = -1;
-                } else {
-                    pieces[index] = buffer;
-                }
-            })
-        }
-        stream = new Readable({
+        let stream = new Readable({
             read() {
                 console.log('read requested for ', _piece);
                 // if (_piece > endPiece) {
@@ -97,34 +92,43 @@ module.exports.CltsService = {
                         _piece++;
                         return null;
                     } else {
-                        _waitingFor = _piece;
-                        _piece++;
-                        // return null;
-                        return engine.critical(_waitingFor, _critical)
-                    }
+                    _waitingFor = _piece;
+                    _piece++;
+                    // return null;
+                    return engine.critical(_waitingFor, _critical)
                 }
-            });
-
-            stream.pipe(readableStream);
-            
-            engine.select(startPiece, endPiece, true, null)
-            
-            /*engine.on('ready', function () {
-                
-                var offset = start + file.offset;
-                var pieceLength = engine.torrent.pieceLength;
-            startPiece = (offset / pieceLength) | 0;
-            endPiece = ((end + file.offset) / pieceLength) | 0;
-            
-            var fileToDownload = engine.files[file.id];
-            
-            var stream = fileToDownload.createReadStream({
-                start,
-                end
-            });
-
-            stream.pipe(readableStream)
-
-        });*/
+            }
+        });
+        
+        engine.on('download', (index, buffer) => {
+            if (_waitingFor === index) {
+                console.log('pushing buffer to stream for', index);
+                if (_offset) {
+                    buffer = buffer.slice(_offset)
+                    _offset = 0
+                }
+                stream.push(buffer);
+                // stream.push(null);
+                if (index >= endPiece) {
+                    // stream.push(null);
+                    stream.destroy();
+                    // stream = null;
+                    // readableStream.end();
+                    engine.deselect(startPiece, endPiece, true, null)
+                    stream = null;
+                }
+                _waitingFor = -1;
+            } else {
+                pieces[index] = buffer;
+            }
+        })
+        
+        streams[file.name] = stream;
+        
+        stream.pipe(readableStream);
+        
+        engine.select(startPiece, endPiece, true, null)
+        
+        engines[file] = engine;
     }
 }

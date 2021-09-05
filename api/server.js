@@ -114,6 +114,11 @@ app.post('/createUploadTask', async (req, res) => {
   // res.send(CommonUtil.createSuccessMessage({},"File upload started"))
 })
 
+app.get('/cancelUploadTask', async (req,res) => {
+  FileService.cancelUploadTask(req.query.id);
+  res.send(CommonUtil.createSuccessMessage({}, 'Task deleted'));
+})
+
 app.route('/downloadFile/:name').get(async (req, res) => {
   // res.send('download api' + req.params.name)
   FileService.downloadFile(req.params.name, req, res, (error) => {
