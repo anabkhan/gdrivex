@@ -11,6 +11,8 @@ function App() {
 
   const [user, setUser] = useState()
 
+  const [currentView, setCurrentView] = useState('FILES')
+
   const handleLogin=()=>{
     if (!user) {
       auth.signInWithPopup(provider).then((result)=>{
@@ -25,6 +27,11 @@ function App() {
     }
   }
 
+  const handleOnItemSelected = (item) => {
+    console.log('handleOnItemSelected', item)
+    setCurrentView(item)
+  }
+
   return (
     <div className="App">
 
@@ -33,11 +40,11 @@ function App() {
         <>
             <Header />
             <div className='app__main'>
-              <SideBar />
-              <FilesView />
+              <SideBar onItemSelected={handleOnItemSelected}/>
+              { currentView === 'FILES' && <FilesView />}
             </div>
             <div>
-            <DrivesView />
+            { currentView === 'DRIVES' && <DrivesView />}
             </div>
           </>
         ) : (
