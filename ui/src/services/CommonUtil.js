@@ -23,3 +23,18 @@ export const copyToClipboard = (text) => {
         }
     }
 }
+
+export const shareDownloadLink = (url, title) => {
+    const shareData = {
+        title,
+        text: `Download ${title}`,
+        url
+      }
+    
+      try {
+        navigator.share(shareData)
+        // resultPara.textContent = 'MDN shared successfully'
+      } catch(err) {
+        // resultPara.textContent = 'Error: ' + err
+      }
+}

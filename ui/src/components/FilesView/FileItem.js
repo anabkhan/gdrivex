@@ -10,12 +10,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import { copyToClipboard } from '../../services/CommonUtil';
+import { copyToClipboard, shareDownloadLink } from '../../services/CommonUtil';
 import Notification from '../Notifications/Notifications';
 
 const options = [
     'Download',
-    'Copy Link',
+    'Share',
     'Delete'
 ];
 
@@ -85,8 +85,8 @@ const FileItem = ({ id, caption, size, onDeleted }) => {
                 deleteFile();
                 break;
 
-            case 'Copy Link':
-                copyToClipboard(`${BASE_URL}${DOWNLOAD_FILE}/${caption}`)
+            case 'Share':
+                shareDownloadLink(`${BASE_URL}${DOWNLOAD_FILE}/${caption}`, caption)
                 break;
         
             default:
