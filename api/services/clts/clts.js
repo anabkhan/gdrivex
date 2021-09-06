@@ -83,6 +83,7 @@ module.exports.CltsService = {
                     }
                     this.push(piece);
                     console.log('buffer fetched for ', _piece);
+                    delete pieces[_piece];
                     if (_piece >= endPiece) {
                         this.destroy();
                         engine.deselect(startPiece, endPiece, true, null);
@@ -90,7 +91,6 @@ module.exports.CltsService = {
                         lastPieces[file.name] = {};
                         lastPieces[file.name][_piece] = piece;
                     }
-                    delete pieces[_piece];
                     _piece++;
                     return null;
                 } else {
