@@ -2,6 +2,7 @@ var torrentStream = require('./torrent-stream');
 const { Readable } = require('stream');
 let engines = {};
 let streams = {};
+let lastPieces = {};
 module.exports.CltsService = {
     getTorrentFiles: (torrentId, onData, onError) => {
         let engine = torrentStream(torrentId);
@@ -71,6 +72,10 @@ module.exports.CltsService = {
             read() {
                 console.log('read requested for ', _piece);
                 var piece = pieces[_piece];
+                if (!piece && lastPieces[file.name]) {
+                    piece = lastPieces[file.name][_piece];
+                    delete lastPieces[file.name];
+                }
                 if (piece) {
                     if (_offset) {
                         piece = piece.slice(_offset)
@@ -78,12 +83,14 @@ module.exports.CltsService = {
                     }
                     this.push(piece);
                     console.log('buffer fetched for ', _piece);
-                    delete pieces[_piece];
                     if (_piece >= endPiece) {
                         this.destroy();
                         engine.deselect(startPiece, endPiece, true, null);
                         stream = null;
+                        lastPieces[file.name] = {};
+                        lastPieces[file.name][_piece] = piece;
                     }
+                    delete pieces[_piece];
                     _piece++;
                     return null;
                 } else {
@@ -107,6 +114,8 @@ module.exports.CltsService = {
                     stream.destroy();
                     engine.deselect(startPiece, endPiece, true, null)
                     stream = null;
+                    lastPieces[file.name] = {};
+                    lastPieces[file.name][index] = buffer;
                 }
                 _waitingFor = -1;
             } else {
