@@ -86,7 +86,7 @@ const FileItem = ({ id, caption, size, onDeleted }) => {
                 break;
 
             case 'Share':
-                shareDownloadLink(`${BASE_URL}${DOWNLOAD_FILE}/${caption}`, caption)
+                shareDownloadLink(`${document.location.origin}/${DOWNLOAD_FILE}/${caption}`, caption)
                 break;
         
             default:
