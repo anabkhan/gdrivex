@@ -32,6 +32,7 @@ export const shareDownloadLink = (url, title) => {
       }
     
       try {
+          console.log('sharing ', shareData)
         navigator.share(shareData)
         // resultPara.textContent = 'MDN shared successfully'
       } catch(err) {
