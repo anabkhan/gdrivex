@@ -95,6 +95,14 @@ app.get('/listDrives', async (req, res) => {
   });
 });
 
+app.get('/refreshDrive', async (req, res) => {
+  GDriveXService.listDrivesAsArray((drives) => {
+    res.send(CommonUtil.createSuccessMessage({}, 'Drive refreshed'))
+  }, (error) => {
+    res.status(400).send(CommonUtil.createFailureMessage(error))
+  })
+})
+
 app.post('/getSchema', async (req, res) => {
   GDriveXService.getOrGenerateSchema(req.body, (schema) => {
     res.send(CommonUtil.createSuccessMessage(schema, "File Schema successfully generated"));

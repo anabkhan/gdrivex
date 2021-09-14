@@ -1,8 +1,19 @@
 .drivesView{
     margin-left: 15%;
+    margin-top: -90px;
+    padding-left: 15px;
 }
 
 .drivesView--header {
     display: flex;
     align-items: center;
+}
+
+.drivesView--header--refresh--drives{
+    cursor: pointer;
+    margin-left: 10px;
+    align-items: center;
+    align-self: center;
+    position: absolute;
+    margin-top: 5px;
 }
