@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import { FilesView } from './components/FilesView/FilesView';
 import Header from './components/header'
-import SideBar from './components/sidebar/index'
+import SideBar from './components/sidebar/SideBar'
 import GDriveLogo from "./media/google-drive-logo.svg";
 import { auth, db, provider } from "./firebase";
 import { DrivesView } from './components/DrivesView/DrivesView';
