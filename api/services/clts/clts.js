@@ -1,4 +1,4 @@
-var torrentStream = require('./torrent-stream');
+var torrentStream = require('torrent-stream');
 const { Readable } = require('stream');
 let engines = {};
 let streams = {};
@@ -89,7 +89,8 @@ module.exports.CltsService = {
                 } else {
                     _waitingFor = _piece;
                     _piece++;
-                    return engine.critical(_waitingFor, _critical)
+                    //return engine.critical(_waitingFor, _critical)
+                    return null;
                 }
             }
         });

@@ -42,6 +42,7 @@
     "request": "^2.88.2",
     "task.js": "^0.1.5",
     "torrent-discovery": "^5.2.0",
-    "torrent-piece": "^1.0.0"
+    "torrent-piece": "^1.0.0",
+    "torrent-stream": "^1.2.1"
   }
 }
